@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -19,7 +20,7 @@ import Register from './pages/Auth/Register';
 import GuestCategory from './pages/Guest/Category';
 import GuestAbout from './pages/Guest/About';
 
-// --- PAGES: USER (MENGGUNAKAN ALIAS UNTUK MENGHINDARI KONFLIK) ---
+// --- PAGES: USER ---
 import UserHome from './pages/User/Home';
 import UserProfile from './pages/User/Profile';
 import UserWishlist from './pages/User/Wishlist';
@@ -29,23 +30,22 @@ import UserAbout from './pages/User/About';
 import UserSecurityTips from './pages/User/SecurityTips';
 import RegisterStore from './pages/User/RegisterStore';
 import UserStoreProfileView from './pages/User/StoreProfile'; 
-// import BookDetail from './pages/User/BookDetail'; // Pastikan file ini sudah dibuat
 
-// --- PAGES: SELLER (CONFIRMED ALIASES) ---
-import SellerHome from './pages/Seller/Home';                   // Beranda Seller
-import SellerAbout from './pages/Seller/About';                 // About Seller
+// --- PAGES: SELLER ---
+import SellerHome from './pages/Seller/Home';                   
+import SellerAbout from './pages/Seller/About';                 
 import SellerAnnouncement from './pages/Seller/Announcement';
-import SellerProfile from './pages/Seller/Profile';             // Profile Seller
-import SellerReview from './pages/Seller/Review';               // Review Seller
+import SellerProfile from './pages/Seller/Profile';             
+import SellerReview from './pages/Seller/Review';               
 import SellerSecurityTips from './pages/Seller/SecurityTips';
-import SellerStoreProducts from './pages/Seller/Store';         // Manajemen Produk Toko
-import SellerStoreProfile from './pages/Seller/StoreProfile';   // Profil Toko Seller
-import SellerStoreSettings from './pages/Seller/StoreSettings'; // Form Tambah/Edit Buku
-import SellerStoreTransactions from './pages/Seller/StoreTransactions'; // Riwayat Transaksi Toko
-import SellerTransactionHistory from './pages/Seller/TransactionHistory'; // Riwayat Pembelian Seller
-import SellerWishlist from './pages/Seller/Wishlist';           // Wishlist Seller
-import UploadReport from './pages/Seller/UploadReport';        // Laporan Unggahan
-import AddProduct from './pages/Seller/Products';              // Form Tambah Produk (Products.jsx)
+import SellerStoreProducts from './pages/Seller/Store';         
+import SellerStoreProfile from './pages/Seller/StoreProfile';   
+import SellerStoreSettings from './pages/Seller/StoreSettings'; 
+import SellerStoreTransactions from './pages/Seller/StoreTransactions'; 
+import SellerTransactionHistory from './pages/Seller/TransactionHistory'; 
+import SellerWishlist from './pages/Seller/Wishlist';           
+import UploadReport from './pages/Seller/UploadReport';        
+import AddProduct from './pages/Seller/Products';              
 
 // --- PAGES: ADMIN ---
 import AdminDashboard from './pages/Admin/AdminDashboard';
@@ -54,11 +54,15 @@ import CategoryManagement from './pages/Admin/CategoryManagement';
 import ContentVerification from './pages/Admin/ContentVerification';
 import ReportListManagement from './pages/Admin/ReportListManagement';
 import AnnouncementManagement from './pages/Admin/AnnouncementManagement';
-// import StoreVerification from './pages/Admin/StoreVerification';
+import SecurityTipsManagement from './pages/Admin/SecurityTipsManagement';
+import AboutManagement from './pages/Admin/AboutManagement';
 
-// --- helper: jika path /home dicek, arahkan seller ke /seller/home ---
+// --- PAGES: UTIL ---
+import NotFound from './pages/Util/NotFound';
+
+// --- Helper: Redirect Home ---
+// Jika Seller login dan mengakses /home, lempar ke /seller/home
 function HomeRouteRedirect() {
-	// Jika ada data seller di localStorage (di-set saat login seller), redirect ke seller home
 	try {
 		const raw = localStorage.getItem('authSeller');
 		if (raw) {
@@ -71,6 +75,7 @@ function HomeRouteRedirect() {
 
 export default function App() {
   return (
+    // Future flags ditambahkan untuk menghilangkan warning React Router v7
     <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <AuthProvider>
         <Routes>
@@ -85,15 +90,16 @@ export default function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/access-denied" element={<div className="text-white text-center mt-20">Akses Ditolak.</div>} />
+          
+          {/* Halaman Akses Ditolak */}
+          <Route path="/access-denied" element={<NotFound />} />
 
           {/* =========================================
-              2. USER ROUTES (Pembeli Murni)
+              2. USER ROUTES (Pembeli)
              ========================================= */}
           <Route element={<ProtectedRoute />}>
             <Route element={<UserLayouts />}>
--              <Route path="/home" element={<UserHome />} />
-+              <Route path="/home" element={<HomeRouteRedirect />} />
+              <Route path="/home" element={<HomeRouteRedirect />} />
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/wishlist" element={<UserWishlist />} />
               <Route path="/history" element={<UserTransactionHistory />} />
@@ -104,19 +110,18 @@ export default function App() {
               <Route path="/register-store" element={<RegisterStore />} />
               <Route path="/store-profile/:id" element={<UserStoreProfileView />} />
             </Route>
-        </Route>
+          </Route>
 
           {/* =========================================
               3. SELLER ROUTES (Penjual)
              ========================================= */}
           <Route element={<SellerRoute />}>
             <Route element={<SellerLayouts />}>
-              {/* DEFAULT LANDING PAGE: Home Seller */}
               <Route path="/seller" element={<Navigate to="/seller/home" replace />} />
               <Route path="/seller/home" element={<SellerHome />} />
               
-              {/* Fitur Seller Spesifik */}
-+             <Route path="/seller/store/profile" element={<SellerStoreProfile />} />
+              {/* Fitur Seller */}
+              <Route path="/seller/store/profile" element={<SellerStoreProfile />} />
               <Route path="/seller/profile" element={<SellerProfile />} />
               <Route path="/seller/about" element={<SellerAbout />} />
               <Route path="/seller/announcements" element={<SellerAnnouncement />} />
@@ -132,12 +137,11 @@ export default function App() {
               {/* Form Tambah/Edit Buku */}
               <Route path="/seller/store/new" element={<AddProduct />} />
               <Route path="/seller/store/edit/:id" element={<SellerStoreSettings />} />
-              
             </Route>
           </Route>
 
           {/* =========================================
-              4. ADMIN ROUTES (Khusus Admin)
+              4. ADMIN ROUTES (Admin)
              ========================================= */}
           <Route path="/admin" element={<AdminRoute />}>
             <Route element={<AdminLayouts />}>
@@ -147,12 +151,13 @@ export default function App() {
               <Route path="content" element={<ContentVerification />} />
               <Route path="reports" element={<ReportListManagement />} />
               <Route path="announcements" element={<AnnouncementManagement />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
+              <Route path="about" element={<AboutManagement />} />
+              <Route path="security-tips" element={<SecurityTipsManagement />} />
             </Route>
           </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Fallback 404 */}
+          <Route path="*" element={<NotFound />} />
 
         </Routes>
       </AuthProvider>

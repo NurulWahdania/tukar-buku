@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 // Pastikan baris import ini ada di paling atas
 import { getMe, updateProfile } from '../../api/client'; 
 
@@ -19,6 +20,10 @@ export default function Profile() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // State untuk Modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   const fileInputRef = useRef(null);
 
@@ -63,8 +68,14 @@ export default function Profile() {
     }
   };
 
-  // 4. HANDLE TOMBOL SIMPAN
-  const handleSave = async () => {
+  // 4. HANDLE TOMBOL SIMPAN (Memicu Modal Konfirmasi)
+  const handleSaveClick = () => {
+    setShowConfirmModal(true);
+  };
+
+  // 5. EKSEKUSI SIMPAN SETELAH KONFIRMASI
+  const confirmSave = async () => {
+    setShowConfirmModal(false);
     setSaving(true);
     try {
       // Gunakan FormData untuk support upload file + data teks
@@ -87,19 +98,24 @@ export default function Profile() {
       const currentAuth = JSON.parse(localStorage.getItem('authUser') || '{}');
       localStorage.setItem('authUser', JSON.stringify({ ...currentAuth, ...updatedData }));
 
-      alert("Profil berhasil diperbarui!");
+      // Tampilkan modal sukses
+      setShowSuccessModal(true);
       
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
       setSelectedFile(null);
       
-      window.location.reload(); 
     } catch (error) {
       console.error("Gagal update:", error);
       alert("Gagal menyimpan perubahan. Cek koneksi atau data Anda.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSuccessOk = () => {
+    setShowSuccessModal(false);
+    window.location.reload(); 
   };
 
   if (loading) {
@@ -184,12 +200,59 @@ export default function Profile() {
       
       <button 
         type="button" 
-        onClick={handleSave}
+        onClick={handleSaveClick}
         disabled={saving}
         className="w-24 h-8 left-[520px] top-[520px] absolute bg-[#FFE4C7] rounded text-black text-xs font-medium hover:bg-[#ffdec0] disabled:opacity-70 transition-colors"
       >
         {saving ? 'Menyimpan...' : 'Simpan'}
       </button>
+
+      {/* MODAL KONFIRMASI */}
+      {showConfirmModal && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1E1E1E] border border-[#FFE4C7]/30 p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+            <h3 className="text-xl font-bold text-[#FFE4C7] mb-4">Konfirmasi Simpan</h3>
+            <p className="text-neutral-300 mb-6">Apakah Anda yakin ingin menyimpan perubahan pada profil Anda?</p>
+            <div className="flex justify-center gap-4">
+              <button 
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 rounded-lg border border-[#FFE4C7] text-[#FFE4C7] hover:bg-[#FFE4C7]/10 transition-colors"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={confirmSave}
+                className="px-4 py-2 rounded-lg bg-[#FFE4C7] text-black font-semibold hover:bg-[#e6cdb0] transition-colors"
+              >
+                Ya, Simpan
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* MODAL SUKSES */}
+      {showSuccessModal && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1E1E1E] border border-[#FFE4C7]/30 p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-[#FFE4C7] mb-2">Berhasil!</h3>
+            <p className="text-neutral-300 mb-6">Data profil Anda telah berhasil diperbarui.</p>
+            <button 
+              onClick={handleSuccessOk}
+              className="w-full py-2 rounded-lg bg-[#FFE4C7] text-black font-semibold hover:bg-[#e6cdb0] transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

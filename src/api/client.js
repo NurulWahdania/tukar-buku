@@ -75,9 +75,12 @@ export const uploadBook = async (payload) => {
 };
 
 export const createStore = async (payload) => {
-  const res = await api.post('/stores/', payload);
+  const isFormData = payload instanceof FormData;
+  const res = await api.post('/stores/', payload, {
+    headers: isFormData ? { 'Content-Type': undefined } : {}
+  });
   return res.data;
-};
+}
 
 export const getMyStore = async () => {
   const res = await api.get('/stores/my-store');
