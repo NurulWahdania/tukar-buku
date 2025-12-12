@@ -25,8 +25,9 @@ export default function AnnouncementManagement() {
             const data = await res.json();
             const mapped = data.map(item => ({
                 id: item.id,
-                title: item.judul,
-                body: item.isi
+                // [UBAH] Mapping dari field backend (title, content)
+                title: item.title,
+                body: item.content
             }));
             setItems(mapped);
         }
@@ -68,8 +69,8 @@ export default function AnnouncementManagement() {
     if (!token) return alert("Unauthorized");
 
     try {
-        // PENTING: Kirim 'judul' dan 'isi' agar sesuai dengan backend (mengatasi error 422)
-        const payload = { judul: form.title, isi: form.body };
+        // [UBAH] Payload menggunakan 'title' dan 'content'
+        const payload = { title: form.title, content: form.body };
 
         if (editingId) {
             // UPDATE

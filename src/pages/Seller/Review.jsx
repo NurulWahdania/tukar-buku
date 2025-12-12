@@ -1,54 +1,60 @@
-// src/pages/Seller/Rewiev.jsx
+// src/pages/Seller/Review.jsx
 import React, { useState, useEffect } from 'react';
-import { getMyListings, getReviewsForBook } from '../../api/client';
+// Tambahkan import deleteReview
+import { getMyListings, getReviewsForBook, deleteReview } from '../../api/client';
 
-export default function Rewiev() {
+export default function Review() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fungsi Fetch Data
+  const fetchAllStoreReviews = async () => {
+    setLoading(true);
+    try {
+      const myBooks = await getMyListings();
+      
+      const reviewsPromises = myBooks.map(async (book) => {
+          try {
+              const bookReviews = await getReviewsForBook(book.id);
+              return Array.isArray(bookReviews) ? bookReviews.map(r => ({
+                  ...r,
+                  book_title: book.title,
+                  book_image: book.image_url
+              })) : [];
+          } catch (e) {
+              return [];
+          }
+      });
+      
+      const results = await Promise.all(reviewsPromises);
+      const flatReviews = results.flat();
+      setReviews(flatReviews);
+
+    } catch (err) {
+      console.error("Gagal memuat ulasan toko:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAllStoreReviews = async () => {
-      setLoading(true);
-      try {
-        // 1. Ambil semua buku milik seller
-        const myBooks = await getMyListings();
-        
-        // 2. Ambil review untuk setiap buku secara paralel
-        const reviewsPromises = myBooks.map(async (book) => {
-            try {
-                const bookReviews = await getReviewsForBook(book.id);
-                // Pastikan return array dan tambahkan info buku ke dalam object review
-                return Array.isArray(bookReviews) ? bookReviews.map(r => ({
-                    ...r,
-                    book_title: book.title,
-                    book_image: book.image_url
-                })) : [];
-            } catch (e) {
-                console.error(`Gagal ambil review untuk buku ${book.id}`, e);
-                return [];
-            }
-        });
-        
-        // 3. Tunggu semua request selesai dan gabungkan array
-        const results = await Promise.all(reviewsPromises);
-        const flatReviews = results.flat();
-        
-        // Opsional: Urutkan berdasarkan ID atau Tanggal (jika ada field created_at)
-        // flatReviews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        setReviews(flatReviews);
-
-      } catch (err) {
-        console.error("Gagal memuat ulasan toko:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAllStoreReviews();
   }, []);
 
-  // Helper untuk format tanggal
+  // --- FUNGSI HAPUS REVIEW ---
+  const handleDelete = async (reviewId) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus ulasan ini?")) {
+        try {
+            await deleteReview(reviewId);
+            // Update state langsung tanpa refresh halaman agar cepat
+            setReviews(prev => prev.filter(r => r.id !== reviewId));
+        } catch (error) {
+            console.error("Gagal menghapus:", error);
+            alert("Gagal menghapus ulasan.");
+        }
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -105,7 +111,7 @@ export default function Rewiev() {
                 </span>
               </div>
 
-              {/* Rating (Bintang & Angka) */}
+              {/* Rating */}
               <div className="left-[210px] top-[24px] absolute flex items-center gap-1">
                 <svg className="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 24 24">
                     <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.402 8.167L12 18.896 4.664 23.164l1.402-8.167L.132 9.21l8.2-1.192z"/>
@@ -125,10 +131,13 @@ export default function Rewiev() {
                 {formatDate(review.created_at)}
               </div>
 
-              {/* Tombol Aksi */}
+              {/* Tombol Aksi (HAPUS) */}
               <div className="left-[868px] top-[20px] absolute">
-                <button className="w-24 h-10 bg-white/5 rounded-[10px] outline outline-1 outline-offset-[-1px] outline-zinc-500 text-Color1 text-sm font-semibold hover:bg-red-500/20 hover:outline-red-500 hover:text-red-200 transition-all">
-                    Lapor
+                <button 
+                    onClick={() => handleDelete(review.id)}
+                    className="w-24 h-10 bg-white/5 rounded-[10px] outline outline-1 outline-offset-[-1px] outline-red-500 text-red-400 text-sm font-semibold hover:bg-red-600 hover:text-white transition-all"
+                >
+                    Hapus
                 </button>
               </div>
             </div>

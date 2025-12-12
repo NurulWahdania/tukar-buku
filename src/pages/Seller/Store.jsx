@@ -1,148 +1,75 @@
-import React, { useState, useEffect, useRef } from 'react'; // <-- added useRef
+// src/pages/Seller/Store.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getMyStore, getBooks, deleteBook } from '../../api/client';
+import { getMyStore, getBooks, deleteBook, updateBook } from '../../api/client';
 import { createPortal } from 'react-dom';
 
 // --- Komponen Kartu Buku Khusus Seller ---
-// Bedanya: Ada Badge Status & Tombol Edit/Hapus (plus menu 3-dot)
-function SellerBookCard({ book, onDeleteRequest, onEdit }) {
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-  const menuRef = useRef(null);
-  const btnRef = useRef(null);
-
-  useEffect(() => {
-    const onDocPointer = (e) => {
-      if (!menuOpen) return;
-      const tgt = e.target;
-      // jika klik di luar tombol atau menu => tutup
-      if (
-        (menuRef.current && menuRef.current.contains(tgt)) ||
-        (btnRef.current && btnRef.current.contains(tgt))
-      ) {
-        return;
-      }
-      setMenuOpen(false);
-    };
-    const onDocKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
-
-    document.addEventListener('pointerdown', onDocPointer);
-    document.addEventListener('keydown', onDocKey);
-    return () => {
-      document.removeEventListener('pointerdown', onDocPointer);
-      document.removeEventListener('keydown', onDocKey);
-    };
-  }, [menuOpen]);
-
-  const openMenu = (e) => {
-    e.stopPropagation();
-    const btn = btnRef.current;
-    if (!btn) {
-      setMenuOpen(v => !v);
-      return;
-    }
-    const rect = btn.getBoundingClientRect();
-    const menuWidth = 180;
-    let left = rect.right - menuWidth;
-    if (left < 8) left = rect.left;
-    const top = rect.bottom + 8;
-    setMenuPos({ top, left });
-    setMenuOpen(true);
-  };
-
-  const closeMenu = () => setMenuOpen(false);
-  const activateEdit = (ev) => { ev.stopPropagation(); closeMenu(); if (typeof onEdit === 'function') onEdit(book); else navigate(`/seller/store/edit/${book.id}`); };
-  const activateDelete = (ev) => { ev.stopPropagation(); closeMenu(); if (typeof onDeleteRequest === 'function') onDeleteRequest(book); };
-
-  // menu rendered via portal untuk menghindari masalah z-index/overflow
-  const menuNode = menuOpen && typeof document !== 'undefined' ? createPortal(
-    <div ref={menuRef} style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 200000 }} className="pointer-events-auto">
-      <div className="px-4 py-2 bg-black/80 rounded-lg shadow-lg border border-white/10 inline-flex items-start gap-2">
-        <div className="w-24 h-14 bg-black/20 rounded-2xl flex items-center justify-center p-2">
-          <div className="w-0.5 h-4 bg-white" />
-        </div>
-        <div className="px-2 py-1 inline-flex flex-col">
-          <button onClick={activateEdit} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/5 text-[#FFE4C7] text-left">
-            <svg className="w-4 h-4 text-[#FFE4C7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-            <span className="text-sm font-medium">Edit</span>
-          </button>
-          <div className="h-1" />
-          <button onClick={activateDelete} className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-white/5 text-red-400 text-left">
-            <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-            <span className="text-sm font-medium">Hapus</span>
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  ) : null;
+function SellerBookCard({ book, onEdit, onToggleSold }) {
+  const displayPrice = book.is_barter 
+    ? "Barter" 
+    : (typeof book.price === 'number' ? `Rp ${book.price.toLocaleString()}` : book.price);
 
   return (
-    <div className="w-60 rounded-xl outline outline-1 outline-white bg-white/5 backdrop-blur-[10px] overflow-hidden flex flex-col relative z-20 pointer-events-auto">
-      <button
-        ref={btnRef}
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={menuOpen}
-        onClick={openMenu}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMenu(e); } }}
-        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center z-60 hover:bg-white/5 pointer-events-auto"
-        title="Menu"
-      >
-        <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="6" r="1.5" />
-          <circle cx="12" cy="12" r="1.5" />
-          <circle cx="12" cy="18" r="1.5" />
-        </svg>
-      </button>
-
+    <div 
+      onClick={() => onEdit(book)} 
+      className="w-60 h-[380px] rounded-xl outline outline-1 outline-white bg-white/5 backdrop-blur-[10px] overflow-hidden flex flex-col relative z-20 pointer-events-auto cursor-pointer group hover:bg-white/10 transition-all"
+    >
       {/* Badge Status Verifikasi */}
       <div className={`absolute top-2 left-2 px-2 py-1 text-[10px] font-bold rounded uppercase z-10 shadow-md ${
-          book.status_verifikasi === 'approved' ? 'bg-green-500 text-white' :
-          book.status_verifikasi === 'rejected' ? 'bg-red-500 text-white' :
+          (book.status_verifikasi || '').toLowerCase() === 'approved' ? 'bg-green-500 text-white' :
+          (book.status_verifikasi || '').toLowerCase() === 'rejected' ? 'bg-red-500 text-white' :
           'bg-yellow-500 text-black'
       }`}>
           {book.status_verifikasi || 'Pending'}
       </div>
 
       {/* Gambar */}
-      <img 
-        className="w-60 h-60 object-cover" 
-        src={book.image_url || "https://placehold.co/240x240?text=No+Image"} 
-        alt={book.title} 
-        onError={(e) => { e.target.src = "https://placehold.co/240x240?text=Error"; }}
-      />
+      <div className="w-full h-60 relative overflow-hidden">
+        <img 
+            className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+            src={book.image_url || "https://placehold.co/240x240?text=No+Image"} 
+            alt={book.title} 
+            onError={(e) => { e.target.src = "https://placehold.co/240x240?text=Error"; }}
+        />
+      </div>
       
       <div className="flex flex-col gap-2 px-4 py-3 flex-1">
-        {/* Info Utama */}
         <div>
           <div className="text-[#FFE4C7] text-sm font-semibold truncate" title={book.title}>{book.title}</div>
           <div className="text-[#FFE4C7] text-xs truncate">{book.author}</div>
         </div>
         
-        <div className="h-0.5 w-full bg-stone-300 my-2" />
+        <div className="h-px w-full bg-white/20 my-1" />
         
-        {/* Harga & Kondisi */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <div>
-            <div className="text-[#FFE4C7] text-[10px]">{book.is_barter ? 'Tipe' : 'Harga'}</div>
-            <div className="text-[#FFE4C7] text-xs font-bold">{book.is_barter ? 'Barter' : (book.price ? `Rp ${book.price.toLocaleString()}` : 0)}</div>
+            <div className="text-[#FFE4C7]/60 text-[10px]">{book.is_barter ? 'Tipe' : 'Harga'}</div>
+            <div className="text-[#FFE4C7] text-xs font-bold">{displayPrice}</div>
           </div>
           <div className="text-right">
-            <div className="text-[#FFE4C7] text-[10px]">Kondisi</div>
+            <div className="text-[#FFE4C7]/60 text-[10px]">Kondisi</div>
             <div className="text-[#FFE4C7] text-xs">{book.condition}</div>
           </div>
         </div>
 
-        {/* Tombol Aksi (Edit & Hapus) */}
-        <div className="mt-3 flex gap-2">
-          <button onClick={() => { if (typeof onEdit === 'function') onEdit(book); else navigate(`/seller/store/edit/${book.id}`); }} className="flex-1 py-1.5 rounded bg-white/10 border border-white/20 text-[#FFE4C7] text-xs font-medium hover:bg-white/20">Edit</button>
-          <button onClick={() => { if (typeof onDeleteRequest === 'function') onDeleteRequest(book); }} className="flex-1 py-1.5 rounded bg-red-500/20 border border-red-500/40 text-red-300 text-xs font-medium hover:bg-red-500/30">Hapus</button>
+        {/* Tombol Status Terjual */}
+        <div className="mt-auto">
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSold(book);
+                }}
+                className={`w-full py-1.5 rounded text-xs font-semibold transition-colors z-20 relative ${
+                    book.is_sold 
+                    ? 'bg-white/10 text-white hover:bg-white/20' 
+                    : 'bg-[#FFE4C7] text-black hover:bg-[#ffdec0]'
+                }`}
+            >
+                {book.is_sold ? 'Tandai Tersedia' : 'Tandai Terjual'}
+            </button>
         </div>
       </div>
-
-      {menuNode}
     </div>
   );
 }
@@ -156,74 +83,63 @@ export default function Store() {
   
   // State Modal Edit
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState(''); 
   const [editingId, setEditingId] = useState(null);
+  
+  // Ref untuk input file
+  const fileInputRef = useRef(null);
+
   const [editForm, setEditForm] = useState({
-    title: '', author: '', condition: '', price: '', is_barter: false, category: '', description: '', image_url: ''
+    title: '', author: '', condition: '', price: '', is_barter: false, description: '', 
+    image_url: '', // URL gambar lama (dari server)
+    image_file: null, // File gambar baru (dari upload)
+    preview_url: null // URL preview gambar baru
   });
   
   // State Konfirmasi
-  const [deleteCandidate, setDeleteCandidate] = useState(null); 
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false); // <-- New state for save confirmation
+  const [deleteId, setDeleteId] = useState(null);
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
 
-  // 1. Ambil Data Toko & Buku Saya
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // A. Ambil Profil Toko
-        const storeData = await getMyStore();
-        setStore(storeData);
+  // 1. Ambil Data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const storeData = await getMyStore();
+      setStore(storeData);
 
-        // B. Ambil Semua Buku -> Filter milik toko ini
-        const allBooks = await getBooks();
-        const filtered = allBooks.filter(b => b.store_id === storeData.id);
-        setMyBooks(filtered);
+      const allBooks = await getBooks();
+      const filtered = allBooks.filter(b => b.store_id === storeData.id);
+      setMyBooks(filtered);
 
-      } catch (err) {
-        console.error("Gagal memuat dashboard:", err);
-        // Jika belum punya toko (404), lempar ke halaman daftar toko
-        if (err.response && (err.response.status === 404 || err.response.status === 403)) {
-            navigate('/register-store');
-        }
-      } finally {
-        setLoading(false);
+    } catch (err) {
+      console.error("Gagal memuat dashboard:", err);
+      if (err.response && (err.response.status === 404 || err.response.status === 403)) {
+          navigate('/register-store');
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [navigate]);
 
-  // 2. Perform delete (no prompt here; prompt is handled by modal)
-  const handleDelete = async (bookId) => {
+  // 2. Logic Toggle Status Terjual
+  const handleToggleSold = async (book) => {
+    const newStatus = !book.is_sold;
     try {
-        await deleteBook(bookId);
-        setMyBooks(prev => prev.filter(b => b.id !== bookId));
-    } catch (err) {
-        alert("Gagal menghapus buku.");
+        const formData = new FormData();
+        formData.append('is_sold', newStatus); 
+        await updateBook(book.id, formData);
+        setMyBooks(prev => prev.map(b => b.id === book.id ? { ...b, is_sold: newStatus } : b));
+    } catch (error) {
+        console.error("Gagal update status:", error);
+        alert("Gagal mengubah status buku.");
     }
   };
-  
-  // request to delete -> open confirmation modal
-  const requestDelete = (book) => {
-    setDeleteCandidate({ id: book.id, title: book.title });
-    setConfirmDeleteOpen(true);
-  };
-  
-  const confirmDelete = async () => {
-    if (!deleteCandidate) return;
-    await handleDelete(deleteCandidate.id);
-    setConfirmDeleteOpen(false);
-    setDeleteCandidate(null);
-  };
-  
-  const cancelDelete = () => {
-    setConfirmDeleteOpen(false);
-    setDeleteCandidate(null);
-  };
 
-  // buka modal edit dengan data book
+  // 3. Logic Edit & Modal
   const openEditModal = (book) => {
     setEditingId(book.id);
     setEditForm({
@@ -232,37 +148,88 @@ export default function Store() {
       condition: book.condition || '',
       price: book.price || '',
       is_barter: Boolean(book.is_barter),
-      category: book.category || '',
       description: book.description || '',
-      image_url: book.image_url || ''
+      image_url: book.image_url || '',
+      image_file: null,
+      preview_url: null
     });
-    setModalTitle('Edit Detail Buku'); 
     setEditModalOpen(true);
   };
-  
+
   const closeEditModal = () => {
     setEditModalOpen(false);
     setEditingId(null);
-    setModalTitle('');
-    setConfirmSaveOpen(false); // Reset confirm state
-  };
-  
-  const handleEditChange = (key, value) => setEditForm(f => ({ ...f, [key]: value }));
-  
-  // Trigger konfirmasi simpan
-  const handleSaveClick = () => {
-    setConfirmSaveOpen(true);
+    setConfirmSaveOpen(false);
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Eksekusi simpan setelah konfirmasi
+  const handleEditChange = (key, value) => setEditForm(f => ({ ...f, [key]: value }));
+
+  // --- HANDLER UPLOAD GAMBAR ---
+  const handleImageChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          setEditForm(prev => ({
+              ...prev,
+              image_file: file,
+              preview_url: URL.createObjectURL(file)
+          }));
+      }
+  };
+
+  const handleSaveClick = () => setConfirmSaveOpen(true);
+
   const handleConfirmSave = async () => {
-    // jika punya API: await updateBook(editingId, editForm)
-    // Simulasi update lokal
-    setMyBooks(prev => prev.map(b => b.id === editingId ? { ...b, ...editForm } : b));
-    
-    setConfirmSaveOpen(false);
-    closeEditModal();
-    // optional: toast/success
+    if(!editingId) return;
+    try {
+        const formData = new FormData();
+        formData.append('title', editForm.title);
+        formData.append('author', editForm.author);
+        formData.append('condition', editForm.condition);
+        
+        if(editForm.is_barter) {
+            formData.append('price', 0);
+            formData.append('is_barter', true);
+        } else {
+            formData.append('price', editForm.price);
+            formData.append('is_barter', false);
+        }
+        
+        formData.append('description', editForm.description);
+
+        // Jika ada file gambar baru, kirimkan
+        if (editForm.image_file) {
+            formData.append('image_file', editForm.image_file);
+        }
+
+        await updateBook(editingId, formData);
+        
+        alert("Perubahan disimpan!");
+        closeEditModal();
+        fetchData(); 
+
+    } catch (error) {
+        console.error(error);
+        alert("Gagal menyimpan perubahan.");
+    }
+  };
+
+  const handleDeleteClick = () => {
+      setDeleteId(editingId);
+      setConfirmDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+      if(!deleteId) return;
+      try {
+          await deleteBook(deleteId);
+          setMyBooks(prev => prev.filter(b => b.id !== deleteId));
+          setConfirmDeleteOpen(false);
+          closeEditModal();
+      } catch (error) {
+          alert("Gagal menghapus buku.");
+      }
   };
 
   if (loading) return <div className="flex h-screen items-center justify-center text-[#FFE4C7]">Memuat Toko...</div>;
@@ -270,10 +237,9 @@ export default function Store() {
   return (
     <div className="w-[1020px] min-h-[800px] relative">
       
-      {/* Header Toko (klik untuk buka profil toko) */}
+      {/* Header Toko */}
       <Link
         to="/seller/store/profile"
-        aria-label="Buka profil toko"
         className="w-full p-6 bg-white/5 rounded-[20px] border border-white/10 backdrop-blur-[10px] flex items-center justify-between mb-6 cursor-pointer hover:bg-white/10 transition-colors"
       >
          <div className="flex items-center gap-4">
@@ -298,7 +264,7 @@ export default function Store() {
         <div className="absolute inset-0 bg-white/5 border border-white backdrop-blur-[10px] pointer-events-none z-0" />
         
         <div className="absolute left-[20px] right-6 top-[12px] z-30 flex items-center justify-between">
-          <div className="text-[#FFE4C7] text-xl font-semibold font-['Inter']">Toko ({myBooks.length})</div>
+          <div className="text-[#FFE4C7] text-xl font-semibold font-['Inter']">Etalase Toko ({myBooks.length})</div>
           <div className="flex items-center gap-3">
             <Link
               to="/seller/store/reports"
@@ -308,7 +274,6 @@ export default function Store() {
             </Link>
             <button
               type="button"
-              aria-label="Tambah Produk"
               onClick={() => navigate('/seller/products')}
               className="h-8 px-4 bg-[#FFE4C7] hover:bg-[#ffdaae] text-black font-semibold rounded-xl flex items-center gap-2 transition-all shadow-sm cursor-pointer"
             >
@@ -320,36 +285,36 @@ export default function Store() {
         <div className="pt-[60px] px-5 pb-5 relative z-10">
           {myBooks.length === 0 ? (
             <div className="w-full flex items-center justify-center">
-              <div className="w-full max-w-[980px] h-60 flex flex-col items-center justify-center rounded-xl bg-white/5 border border-white/10 text-center text-white/60 p-6">
+              <div className="text-center text-white/60 py-20">
                 <div className="text-[#FFE4C7] text-lg font-semibold mb-2">Etalase Toko Kosong</div>
                 <div className="mb-4">Belum ada buku di etalase. Tambahkan produk pertama Anda untuk mulai berjualan.</div>
-                
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-x-5 gap-y-6 pointer-events-auto z-10">
               {myBooks.map(book => (
-                <div key={book.id} className="pointer-events-auto z-20">
-                  <SellerBookCard book={book} onDeleteRequest={requestDelete} onEdit={openEditModal} />
-                </div>
+                <SellerBookCard 
+                    key={book.id} 
+                    book={book} 
+                    onEdit={openEditModal} 
+                    onToggleSold={handleToggleSold} 
+                />
               ))}
             </div>
           )}
         </div>
        </div>
 
-      {/* EDIT MODAL (Improved UI) */}
+      {/* --- MODAL EDIT BUKU (POPUP) --- */}
       {editModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[120000] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeEditModal} />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeEditModal} />
           
           <div className="relative z-10 w-full max-w-4xl bg-[#18181b] border border-[#FFE4C7]/20 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-               <h3 className="text-xl font-bold text-[#FFE4C7]">{modalTitle || 'Edit Detail Buku'}</h3>
-               <button onClick={closeEditModal} className="text-white/50 hover:text-white transition-colors">
-                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-               </button>
+               <h3 className="text-xl font-bold text-[#FFE4C7]">Edit Detail Buku</h3>
+               <button onClick={closeEditModal} className="text-white/50 hover:text-white transition-colors text-2xl">×</button>
             </div>
 
             {/* Modal Body */}
@@ -358,48 +323,40 @@ export default function Store() {
                <div className="space-y-5">
                   <div>
                     <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Judul Buku</label>
-                    <input 
-                      value={editForm.title} 
-                      onChange={e=>handleEditChange('title', e.target.value)} 
-                      className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors" 
-                    />
+                    <input value={editForm.title} onChange={e=>handleEditChange('title', e.target.value)} className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none" />
                   </div>
                   
                   <div>
                     <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Pengarang</label>
-                    <input 
-                      value={editForm.author} 
-                      onChange={e=>handleEditChange('author', e.target.value)} 
-                      className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors" 
-                    />
+                    <input value={editForm.author} onChange={e=>handleEditChange('author', e.target.value)} className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Kondisi</label>
-                      <input 
-                        value={editForm.condition} 
-                        onChange={e=>handleEditChange('condition', e.target.value)} 
-                        className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors" 
-                      />
+                      <select value={editForm.condition} onChange={e=>handleEditChange('condition', e.target.value)} className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-3 py-2.5 text-[#FFE4C7] outline-none bg-[#18181b]">
+                         <option value="Baru">Baru</option>
+                         <option value="Bekas - Seperti Baru">Bekas - Seperti Baru</option>
+                         <option value="Bekas - Baik">Bekas - Baik</option>
+                         <option value="Bekas - Cukup">Bekas - Cukup</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Harga</label>
                       <input 
-                        value={editForm.price} 
-                        onChange={e=>handleEditChange('price', e.target.value)} 
-                        className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors" 
+                         type="number" 
+                         value={editForm.price} 
+                         disabled={editForm.is_barter}
+                         onChange={e=>handleEditChange('price', e.target.value)} 
+                         className={`w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none ${editForm.is_barter ? 'opacity-50 cursor-not-allowed' : ''}`} 
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Kategori</label>
-                    <input 
-                      value={editForm.category} 
-                      onChange={e=>handleEditChange('category', e.target.value)} 
-                      className="w-full bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-2.5 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors" 
-                    />
+                  
+                  <div className="flex items-center gap-3 mt-2">
+                     <label className="text-[#FFE4C7] text-sm">Mode Transaksi:</label>
+                     <button type="button" onClick={()=>handleEditChange('is_barter', false)} className={`px-3 py-1 rounded text-xs ${!editForm.is_barter ? 'bg-[#FFE4C7] text-black' : 'bg-white/10 text-white'}`}>Jual</button>
+                     <button type="button" onClick={()=>handleEditChange('is_barter', true)} className={`px-3 py-1 rounded text-xs ${editForm.is_barter ? 'bg-[#FFE4C7] text-black' : 'bg-white/10 text-white'}`}>Barter</button>
                   </div>
                </div>
 
@@ -407,16 +364,32 @@ export default function Store() {
                <div className="space-y-5 flex flex-col">
                   <div>
                     <label className="block text-[#FFE4C7] text-xs font-medium mb-2">Foto Buku</label>
-                    <div className="w-full h-48 bg-neutral-900/50 rounded-lg border border-[#FFE4C7]/30 overflow-hidden relative group">
-                      {editForm.image_url ? (
-                        <img className="w-full h-full object-cover" src={editForm.image_url} alt="preview" />
+                    
+                    {/* Area Klik untuk Upload */}
+                    <div 
+                        onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                        className="w-full h-48 bg-neutral-900/50 rounded-lg border border-[#FFE4C7]/30 border-dashed hover:border-[#FFE4C7] overflow-hidden flex items-center justify-center cursor-pointer group transition-colors"
+                    >
+                      {/* Tampilkan Preview (Gambar Baru atau Gambar Lama) */}
+                      {editForm.preview_url ? (
+                         <img className="w-full h-full object-cover" src={editForm.preview_url} alt="preview" />
+                      ) : editForm.image_url ? (
+                         <img className="w-full h-full object-cover" src={editForm.image_url} alt="current" />
                       ) : (
-                        <div className="flex items-center justify-center h-full text-white/30 text-sm">Tidak ada gambar</div>
+                         <div className="flex flex-col items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white/30 group-hover:text-[#FFE4C7]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span className="text-white/30 text-xs group-hover:text-[#FFE4C7]">Klik untuk ganti foto</span>
+                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">Ganti Foto (Coming Soon)</span>
-                      </div>
                     </div>
+                    {/* Input File Tersembunyi */}
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleImageChange} 
+                        accept="image/*" 
+                        className="hidden" 
+                    />
                   </div>
 
                   <div className="flex-1 flex flex-col">
@@ -424,26 +397,36 @@ export default function Store() {
                     <textarea 
                       value={editForm.description} 
                       onChange={e=>handleEditChange('description', e.target.value)} 
-                      className="w-full flex-1 bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-3 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors resize-none" 
+                      className="w-full flex-1 bg-white/5 rounded-lg border border-[#FFE4C7]/30 px-4 py-3 text-[#FFE4C7] outline-none resize-none" 
                     />
                   </div>
                </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-white/5">
+            <div className="p-6 border-t border-white/10 flex justify-between items-center bg-white/5">
+               {/* Tombol Hapus */}
                <button 
-                 onClick={closeEditModal} 
-                 className="px-6 py-2.5 rounded-lg border border-white/20 text-[#FFE4C7] hover:bg-white/5 transition-colors font-medium text-sm"
+                 onClick={handleDeleteClick}
+                 className="px-4 py-2 rounded-lg bg-red-600/10 border border-red-600/50 text-red-500 hover:bg-red-600 hover:text-white transition-colors font-medium text-sm"
                >
-                 Batal
+                 Hapus Buku Ini
                </button>
-               <button 
-                 onClick={handleSaveClick} 
-                 className="px-6 py-2.5 rounded-lg bg-[#FFE4C7] text-black hover:bg-[#ffdec0] transition-colors font-bold text-sm shadow-lg shadow-[#FFE4C7]/10"
-               >
-                 Simpan Perubahan
-               </button>
+
+               <div className="flex gap-3">
+                    <button 
+                        onClick={closeEditModal} 
+                        className="px-6 py-2.5 rounded-lg border border-white/20 text-[#FFE4C7] hover:bg-white/5 transition-colors font-medium text-sm"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        onClick={handleSaveClick} 
+                        className="px-6 py-2.5 rounded-lg bg-[#FFE4C7] text-black hover:bg-[#ffdec0] transition-colors font-bold text-sm shadow-lg shadow-[#FFE4C7]/10"
+                    >
+                        Simpan Perubahan
+                    </button>
+               </div>
             </div>
           </div>
         </div>,
@@ -454,12 +437,9 @@ export default function Store() {
       {confirmSaveOpen && (
         <div className="fixed inset-0 z-[130000] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setConfirmSaveOpen(false)} />
-          <div className="relative z-[130001] w-full max-w-sm p-6 bg-[#18181b] border border-[#FFE4C7]/30 rounded-2xl shadow-2xl text-center transform scale-100 animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-[#FFE4C7]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#FFE4C7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-            </div>
+          <div className="relative z-[130001] w-full max-w-sm p-6 bg-[#18181b] border border-[#FFE4C7]/30 rounded-2xl shadow-2xl text-center">
             <h3 className="text-[#FFE4C7] text-xl font-bold mb-2">Simpan Perubahan?</h3>
-            <p className="text-white/60 mb-6 text-sm">Pastikan data yang Anda masukkan sudah benar sebelum menyimpan.</p>
+            <p className="text-white/60 mb-6 text-sm">Pastikan data yang Anda masukkan sudah benar.</p>
             <div className="flex justify-center gap-3">
               <button 
                 onClick={() => setConfirmSaveOpen(false)} 
@@ -480,14 +460,14 @@ export default function Store() {
 
       {/* CONFIRM DELETE MODAL */}
       {confirmDeleteOpen && (
-        <div className="fixed inset-0 z-[110000] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={cancelDelete} />
-          <div className="relative z-[110001] w-96 p-6 bg-[#06070a] border border-white/10 rounded-xl shadow-2xl text-center">
-            <h3 className="text-[#FFE4C7] text-lg font-semibold mb-4">Yakin ingin menghapus?</h3>
-            <p className="text-[#CDBA9A] mb-6">Hapus buku: <span className="text-white font-semibold">{deleteCandidate?.title}</span></p>
+        <div className="fixed inset-0 z-[130000] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setConfirmDeleteOpen(false)} />
+          <div className="relative z-[130001] w-96 p-6 bg-[#06070a] border border-white/10 rounded-xl shadow-2xl text-center">
+            <h3 className="text-[#FFE4C7] text-lg font-semibold mb-4">Hapus Buku?</h3>
+            <p className="text-[#CDBA9A] mb-6">Tindakan ini tidak dapat dibatalkan. Buku akan hilang dari toko Anda.</p>
             <div className="flex justify-center gap-4">
-              <button onClick={cancelDelete} className="px-5 py-2 border border-white/20 rounded-lg text-[#FFE4C7] hover:bg-white/10 transition">Batal</button>
-              <button onClick={confirmDelete} className="px-5 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition">Hapus</button>
+              <button onClick={() => setConfirmDeleteOpen(false)} className="px-5 py-2 border border-white/20 rounded-lg text-[#FFE4C7] hover:bg-white/10 transition">Batal</button>
+              <button onClick={confirmDelete} className="px-5 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition">Ya, Hapus</button>
             </div>
           </div>
         </div>

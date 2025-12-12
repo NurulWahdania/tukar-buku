@@ -48,3 +48,9 @@ class User(Base):
     
     # Relasi ke Transaction: Satu User bisa punya banyak Transaksi
     transactions = relationship("Transaction", back_populates="user")
+
+        # --- RELASI BARU (FITUR ADMIN) ---
+    # Menghubungkan User (Admin) ke konten yang mereka buat
+    announcements = relationship("Announcement", back_populates="author")
+    about_contents = relationship("AboutContent", back_populates="author")
+    security_tips = relationship("SecurityTip", back_populates="author")

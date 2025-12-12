@@ -201,6 +201,10 @@ class Review(ReviewBase):
     user_id: int
     created_at: datetime
     
+    # Tambahkan ini agar frontend bisa baca nama user dan judul buku
+    user: Optional[UserBase] = None 
+    book: Optional[BookBase] = None
+
     class Config:
         from_attributes = True
 
@@ -247,38 +251,53 @@ class Transaction(TransactionBase):
 # Skema Lainnya
 # ==================
 
+# --- Announcement Schemas (UPDATED) ---
 class AnnouncementBase(BaseModel):
-    judul: str
-    isi: Optional[str] = None
+    title: str
+    content: str
+    is_active: Optional[int] = 1
 
 class AnnouncementCreate(AnnouncementBase):
     pass
 
 class Announcement(AnnouncementBase):
     id: int
+    created_at: datetime
+    created_by: Optional[int] = None
+    
     class Config:
         from_attributes = True
 
-class SecurityTipBase(BaseModel):
-    judul: str
-    isi: Optional[str] = None
-
-class SecurityTipCreate(SecurityTipBase):
-    pass
-
-class SecurityTip(SecurityTipBase):
-    id: int
-    class Config:
-        from_attributes = True
-
+# --- AboutContent Schemas (UPDATED) ---
 class AboutContentBase(BaseModel):
-    judul: str
-    isi: Optional[str] = None
+    title: str
+    content: str
+    image_url: Optional[str] = None
 
 class AboutContentCreate(AboutContentBase):
     pass
 
 class AboutContent(AboutContentBase):
     id: int
+    updated_at: datetime
+    created_by: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+# --- SecurityTip Schemas (UPDATED) ---
+class SecurityTipBase(BaseModel):
+    title: str
+    content: str
+    icon_name: Optional[str] = None
+
+class SecurityTipCreate(SecurityTipBase):
+    pass
+
+class SecurityTip(SecurityTipBase):
+    id: int
+    created_at: datetime
+    created_by: Optional[int] = None
+
     class Config:
         from_attributes = True

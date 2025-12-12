@@ -23,11 +23,11 @@ export default function AboutManagement() {
         const res = await fetch('http://localhost:8000/about/');
         if (res.ok) {
             const data = await res.json();
-            // Map backend fields (judul, isi) to frontend (title, body)
+            // [UBAH] Map backend fields (title, content) to frontend
             const mapped = data.map(item => ({
                 id: item.id,
-                title: item.judul,
-                body: item.isi
+                title: item.title,
+                body: item.content
             }));
             setItems(mapped);
         }
@@ -69,6 +69,9 @@ export default function AboutManagement() {
     if (!token) return alert("Unauthorized");
 
     try {
+        // [UBAH] Payload menggunakan 'title' dan 'content'
+        const payload = { title: form.title, content: form.body };
+
         if (editingId) {
             // UPDATE
             const res = await fetch(`http://localhost:8000/about/${editingId}`, {
@@ -77,7 +80,7 @@ export default function AboutManagement() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ judul: form.title, isi: form.body })
+                body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Gagal update");
         } else {
@@ -88,7 +91,7 @@ export default function AboutManagement() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ judul: form.title, isi: form.body })
+                body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Gagal simpan");
         }

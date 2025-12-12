@@ -1,3 +1,4 @@
+// src/api/client.js
 import axios from 'axios';
 
 // URL Backend
@@ -64,6 +65,11 @@ export const getBooks = async (params = {}) => {
 
 export const getBookById = async (id) => {
   const res = await api.get(`/books/${id}`);
+  return res.data;
+};
+
+export const getStoreById = async (id) => {
+  const res = await api.get(`/stores/${id}`);
   return res.data;
 };
 
@@ -157,7 +163,7 @@ export const getMyStoreSales = async () => {
   return res.data;
 };
 
-// --- FUNGSI REVIEW (USER) ---
+// --- FUNGSI REVIEW (USER & SELLER) ---
 export const createReview = async (payload) => {
   const res = await api.post('/reviews/', payload);
   return res.data;
@@ -168,10 +174,22 @@ export const getReviewsForBook = async (book_id) => {
   return res.data;
 };
 
+// TAMBAHAN: Untuk Seller melihat ulasan tokonya
+export const getMyStoreReviews = async () => {
+  const res = await api.get('/reviews/my-store-reviews');
+  return res.data;
+};
+
+// TAMBAHAN: Untuk menghapus ulasan (Seller/Admin)
+export const deleteReview = async (review_id) => {
+  const res = await api.delete(`/reviews/${review_id}`);
+  return res.data;
+};
+
 
 // --- ADMIN ---
 export const getDashboardStats = async () => {
-  const res = await api.get('/stats/');
+  const res = await api.get('/reports/dashboard-stats'); // Updated URL
   return res.data;
 };
 
@@ -180,7 +198,6 @@ export const getAllUsers = async () => {
   return res.data;
 };
 
-// TAMBAHAN: Hapus User
 export const deleteUser = async (id) => {
   const res = await api.delete(`/users/${id}`);
   return res.data;
@@ -197,7 +214,7 @@ export const deleteCategory = async (id) => {
   return res.data;
 };
 
-// FUNGSI ADMIN BARU (DIPERBAIKI UNTUK MENGIRIM PARAMETER)
+// FUNGSI ADMIN BARU
 export const getPendingBooks = async (skip = 0, limit = 100) => {
   const res = await api.get('/books/pending', {
     params: {
@@ -209,7 +226,6 @@ export const getPendingBooks = async (skip = 0, limit = 100) => {
 };
 
 export const moderateBook = async (payload) => {
-  // Hapus trailing slash agar sesuai dengan endpoint backend
   const res = await api.post('/moderations', payload);
   return res.data;
 };

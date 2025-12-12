@@ -267,7 +267,7 @@ export default function SellerLayouts() {
 
           {profileOpen && (
             <div className="absolute right-0 top-full mt-2 w-60 z-60 pointer-events-auto">
-              <div className="bg-white/5 rounded-2xl border border-white/10 p-3 space-y-3 mt-2">
+              <div className="bg-white/5 rounded-2xl border border-white/10 p-3 space-y-3 mt-2 backdrop-blur-xl bg-black/80">
                 <button
                   onClick={() => { setProfileOpen(false); navigate('/seller/profile'); }}
                   className="w-full py-3 rounded-md text-[#FFE4C7] text-base font-medium hover:bg-white/10 text-left pl-3 flex items-center"
@@ -289,6 +289,18 @@ export default function SellerLayouts() {
                   </svg>
                   <span>Riwayat Pembelian</span>
                 </button>
+
+                {/* --- MENU BARU: ULASAN TOKO --- */}
+                <button
+                    onClick={() => { setProfileOpen(false); navigate('/seller/review'); }}
+                    className="w-full py-3 rounded-md text-[#FFE4C7] text-base font-medium hover:bg-white/10 text-left pl-3 flex items-center"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-3 text-[#FFE4C7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+                    </svg>
+                    <span>Ulasan Toko</span>
+                </button>
+                
                 <button
                   onClick={() => setConfirmLogoutOpen(true)}
                   className="w-full py-3 rounded-md text-[#FFE4C7] text-base font-medium hover:bg-white/10 flex items-center justify-start gap-3 pl-3"

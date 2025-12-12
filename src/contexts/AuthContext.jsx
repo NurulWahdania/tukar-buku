@@ -1,15 +1,12 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loginUser, getMe } from '../api/client';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Hapus useNavigate di sini jika AuthProvider membungkus BrowserRouter di main.jsx
-  // Tapi untuk amannya kita kelola state saja di sini.
 
   // Cek apakah user sudah login saat website direfresh
   useEffect(() => {
@@ -50,7 +47,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // BERSIHKAN SEMUA DATA SESI AGAR BERSIH
     localStorage.removeItem('access_token');
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('authSeller'); // <--- PENTING: Hapus data seller agar tidak salah redirect
+
     setUser(null);
     window.location.href = '/login'; // Redirect paksa ke login
   };

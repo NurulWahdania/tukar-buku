@@ -105,9 +105,6 @@ def get_pending_books(
     db: Session = Depends(database.get_db),
     admin_user: userModels.User = Depends(auth.get_current_admin_user)
 ):
-    """
-    Mengambil daftar buku yang status verifikasinya masih PENDING. (Untuk Moderasi Admin)
-    """
     books = db.query(bookModels.Book).options(
         joinedload(bookModels.Book.store),
         joinedload(bookModels.Book.categories)
@@ -125,9 +122,6 @@ def get_my_listings(
     db: Session = Depends(database.get_db),
     seller_user: userModels.User = Depends(auth.get_current_seller_user)
 ):
-    """
-    Mengambil daftar semua buku yang dimiliki oleh Seller yang sedang login (termasuk PENDING/REJECTED).
-    """
     store = db.query(storeModels.Store).filter(storeModels.Store.owner_id == seller_user.id).first()
     if not store:
         raise HTTPException(status_code=404, detail="Store not found for this user")
@@ -164,6 +158,7 @@ def update_book(
     price: Optional[float] = Form(None),
     is_barter: Optional[bool] = Form(None),
     description: Optional[str] = Form(None),
+    is_sold: Optional[bool] = Form(None),  # <--- PARAMETER BARU DITAMBAHKAN
     category_ids: Optional[str] = Form(None),
     image_file: Optional[UploadFile] = File(None),
     db: Session = Depends(database.get_db),
@@ -189,6 +184,10 @@ def update_book(
     if is_barter is not None: db_book.is_barter = is_barter
     if description is not None: db_book.description = description
     
+    # --- UPDATE STATUS TERJUAL ---
+    if is_sold is not None:
+        db_book.is_sold = is_sold
+    
     # 4. Update Gambar (Jika ada file baru) DAN HAPUS YANG LAMA
     if image_file and image_file.filename:
         UPLOAD_DIR = "static/images/books"
@@ -204,12 +203,9 @@ def update_book(
             
         new_image_url = f"http://localhost:8000/{UPLOAD_DIR}/{filename}".replace("\\", "/")
 
-        # --- HAPUS FILE LAMA (PERBAIKAN) ---
+        # --- HAPUS FILE LAMA ---
         if old_image_url and "http://localhost:8000/" in old_image_url:
-            # Hapus base URL
             local_path_to_delete = old_image_url.replace("http://localhost:8000/", "", 1)
-            
-            # Normalisasi path separator agar sesuai OS (Windows pakai \, Linux pakai /)
             local_path_to_delete = local_path_to_delete.replace("/", os.sep).replace("\\", os.sep)
             
             if os.path.exists(local_path_to_delete):
@@ -232,8 +228,21 @@ def update_book(
         except json.JSONDecodeError:
             pass 
 
-    # 6. Set status kembali ke PENDING karena ada editan
-    db_book.status_verifikasi = bookModels.VerificationStatus.PENDING
+    # 6. Set status kembali ke PENDING HANYA jika data konten (teks/gambar) berubah
+    # Jika hanya mengupdate status 'is_sold', tidak perlu moderasi ulang
+    content_changed = any([
+        title is not None, 
+        author is not None, 
+        condition is not None, 
+        price is not None, 
+        is_barter is not None, 
+        description is not None, 
+        category_ids is not None, 
+        image_file is not None
+    ])
+    
+    if content_changed:
+        db_book.status_verifikasi = bookModels.VerificationStatus.PENDING
     
     db.commit()
     db.refresh(db_book)

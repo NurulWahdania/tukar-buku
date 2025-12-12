@@ -41,36 +41,37 @@ export default function Login() {
             // 3. Ambil Profil User Terbaru
             const userProfile = await getMe();
             
-            // Simpan data user agar bisa dipakai di Layouts (Navbar dll)
+            // Simpan data user umum
             localStorage.setItem('authUser', JSON.stringify(userProfile));
             
             // ===============================================
-            // LOGIKA REDIRECT (PENGATUR LALU LINTAS) - DIPERBAIKI
+            // LOGIKA REDIRECT (DIPERBAIKI)
             // ===============================================
             
-            // Ambil nama role (lowercase agar aman)
             const roleName = userProfile.role?.name?.toLowerCase() || '';
-            
-            // Cek apakah user punya data toko (objek store tidak null)
             const hasStore = userProfile.store !== null && userProfile.store !== undefined;
 
             console.log("DEBUG LOGIN -> Role:", roleName, "| Punya Toko:", hasStore);
 
             if (roleName.includes('admin')) {
-                // 1. JIKA ADMIN
+                // ADMIN
+                // PENTING: Hapus sisa data seller jika ada agar tidak konflik
+                localStorage.removeItem('authSeller'); 
                 console.log("Redirecting to Admin Dashboard...");
                 navigate('/admin', { replace: true });
             } 
             else if (roleName.includes('seller') || hasStore) {
-                // 2. JIKA SELLER (ATAU USER BIASA TAPI PUNYA TOKO)
-                // Simpan profil sebagai authSeller agar SellerLayouts dapat membaca,
-                // lalu arahkan ke home seller.
-                try { localStorage.setItem('authSeller', JSON.stringify(userProfile)); } catch (e) { /* ignore */ }
+                // SELLER
+                // Set authSeller agar router tahu ini seller
+                localStorage.setItem('authSeller', JSON.stringify(userProfile));
                 console.log("Redirecting to Seller Home...");
                 navigate('/seller/home', { replace: true });
             } 
             else {
-                // 3. JIKA USER BIASA (PEMBELI MURNI)
+                // USER BIASA
+                // PENTING: Hapus authSeller agar tidak nyasar ke halaman seller!
+                localStorage.removeItem('authSeller'); 
+                
                 console.log("Redirecting to User Home...");
                 navigate('/home', { replace: true });
             }
@@ -122,7 +123,6 @@ export default function Login() {
                   placeholder=" "
                   className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors"
                 />
-                {/* label hanya muncul jika field kosong; hilang langsung saat mulai mengetik */}
                 {!username && (
                   <label htmlFor="login-username" className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">
                     Username
@@ -141,7 +141,6 @@ export default function Login() {
                   placeholder=" "
                   className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors"
                 />
-                {/* label hanya muncul jika field kosong; hilang langsung saat mulai mengetik */}
                 {!password && (
                   <label htmlFor="login-password" className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">
                     Password

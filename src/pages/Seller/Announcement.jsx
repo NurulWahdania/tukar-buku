@@ -25,8 +25,9 @@ export default function Announcement() {
           ) : (
               announcements.map((item) => (
                   <div key={item.id} className="border-b border-white/10 pb-4 last:border-0">
-                      <h3 className="text-lg font-bold mb-1">{item.judul}</h3>
-                      <p className="break-words whitespace-pre-line opacity-90">{item.isi}</p>
+                      {/* [UBAH] Menggunakan title & content */}
+                      <h3 className="text-lg font-bold mb-1">{item.title}</h3>
+                      <p className="break-words whitespace-pre-line opacity-90">{item.content}</p>
                   </div>
               ))
           )}

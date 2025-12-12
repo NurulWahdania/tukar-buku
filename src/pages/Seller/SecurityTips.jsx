@@ -25,8 +25,9 @@ export default function SecurityTips() {
           ) : (
               tips.map((item, index) => (
                 <div key={item.id}>
-                    <div className="font-semibold">{index + 1}. {item.judul}</div>
-                    <p className="mt-2 break-words whitespace-pre-line opacity-90">{item.isi}</p>
+                    {/* [UBAH] Menggunakan title & content */}
+                    <div className="font-semibold">{index + 1}. {item.title}</div>
+                    <p className="mt-2 break-words whitespace-pre-line opacity-90">{item.content}</p>
                 </div>
               ))
           )}

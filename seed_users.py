@@ -26,11 +26,19 @@ from backend.MainUtama.database import SessionLocal
 from backend.MainUtama import utils 
 from backend.Models import userModels, storeModels, roleModels, reviewModels
 
-# Import model lain yang direlasikan oleh User/Review
-try:
-    from backend.Models import reportModels, wishlistModels, transactionModels, bookModels, categoryModels, moderationModels
-except ImportError:
-    pass
+# [FIX] Import model yang sudah dipecah agar SQLAlchemy mengenali relasi di User
+from backend.Models import (
+    reportModels, 
+    wishlistModels, 
+    transactionModels, 
+    bookModels, 
+    categoryModels, 
+    moderationModels, 
+    # contentModels,  <-- HAPUS INI karena file tidak ada
+    announcementModels, # Tambahkan ini
+    aboutContentModels, # Tambahkan ini
+    securityTipModels   # Tambahkan ini
+)
 
 def get_password_hash(password):
     # Gunakan fungsi hashing dari utils aplikasi agar formatnya sama persis

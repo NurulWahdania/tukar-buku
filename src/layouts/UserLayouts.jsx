@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import bg from '../assets/latar.png';
-import { getMe } from '../api/client'; // Import fungsi API
+import { getMe } from '../api/client'; 
 
 // Komponen Sidebar Dinamis untuk User
 function UserSidebar({ activeKey, setActiveKey }) {
@@ -164,8 +164,6 @@ export default function UserLayouts() {
           }
         } catch (err) {
           console.error("Gagal sync profil di layout:", err);
-          // Jika token invalid/expired, mungkin perlu logout?
-          // Untuk sekarang biarkan dulu agar tidak mengganggu UX
         }
       }
     };
@@ -210,11 +208,13 @@ export default function UserLayouts() {
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
   
+  // PERBAIKAN LOGOUT: Hapus juga authSeller agar tidak salah redirect nanti
   const handleLogout = () => {
     try { 
         localStorage.removeItem('authUser'); 
         localStorage.removeItem('access_token');
         localStorage.removeItem('isAuthenticated'); 
+        localStorage.removeItem('authSeller'); // <--- PENTING: Hapus ini
     } catch {}
     navigate('/login');
   };

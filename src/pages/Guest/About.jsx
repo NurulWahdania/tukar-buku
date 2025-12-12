@@ -25,9 +25,10 @@ export default function About() {
     <div className="max-w-[1020px] mx-auto space-y-6">
       {contents.map((item) => (
         <section key={item.id} className="bg-white/5 border border-white/10 rounded-[20px] backdrop-blur-[10px] p-6">
-            <h2 className="text-[#FFE4C7] text-xl font-semibold mb-2 w-full">{item.judul}</h2>
+            {/* [UBAH] Menggunakan title & content */}
+            <h2 className="text-[#FFE4C7] text-xl font-semibold mb-2 w-full">{item.title}</h2>
             <div className="text-[#FFE4C7] text-base leading-relaxed w-full whitespace-normal break-words whitespace-pre-line">
-            {item.isi}
+            {item.content}
             </div>
         </section>
       ))}

@@ -26,8 +26,9 @@ export default function SecurityTipsManagement() {
             const data = await res.json();
             const mapped = data.map(item => ({
                 id: item.id,
-                title: item.judul,
-                body: item.isi
+                // [UBAH] Mapping dari backend (title, content)
+                title: item.title,
+                body: item.content
             }));
             setTips(mapped);
         }
@@ -72,6 +73,9 @@ export default function SecurityTipsManagement() {
     if (!token) return alert("Unauthorized");
 
     try {
+        // [UBAH] Payload menggunakan 'title' dan 'content'
+        const payload = { title: form.title, content: form.body };
+
         if (editingId) {
             // UPDATE
             const res = await fetch(`http://localhost:8000/security-tips/${editingId}`, {
@@ -80,7 +84,7 @@ export default function SecurityTipsManagement() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ judul: form.title, isi: form.body })
+                body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Gagal update");
         } else {
@@ -91,7 +95,7 @@ export default function SecurityTipsManagement() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ judul: form.title, isi: form.body })
+                body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Gagal simpan");
         }
