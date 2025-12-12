@@ -19,7 +19,8 @@ def create_about_content(
     db: Session = Depends(database.get_db),
     admin_user: userModels.User = Depends(auth.get_current_admin_user)
 ):
-    db_content = db.query(aboutContentModels.AboutContent).filter(aboutContentModels.AboutContent.judul == content.judul).first()
+    # Sesuaikan dengan model: judul -> title
+    db_content = db.query(aboutContentModels.AboutContent).filter(aboutContentModels.AboutContent.title == content.title).first()
     if db_content:
         raise HTTPException(status_code=400, detail="Content with this title already exists")
 
@@ -41,8 +42,9 @@ def update_about_content(
     if not db_item:
         raise HTTPException(status_code=404, detail="Item not found")
     
-    db_item.judul = item.judul
-    db_item.isi = item.isi
+    # Sesuaikan dengan model: judul -> title, isi -> content
+    db_item.title = item.title
+    db_item.content = item.content
     db.commit()
     db.refresh(db_item)
     return db_item
