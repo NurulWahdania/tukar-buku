@@ -199,11 +199,10 @@ app = FastAPI(
 )
 
 # --- 3. CORS ---
-env_origins = os.getenv("ALLOWED_ORIGINS")
-if env_origins:
-    origins = [o.strip() for o in env_origins.split(",") if o.strip()]
-else:
-    origins = ["*"]
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,

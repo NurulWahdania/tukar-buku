@@ -24,6 +24,9 @@ def create_transaction(
         raise HTTPException(status_code=404, detail="Book not found")
     
     # 2. Cek apakah user membeli bukunya sendiri
+    if not book.store:
+        raise HTTPException(status_code=404, detail="Store not found for this book")
+
     if book.store.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="You cannot buy your own book")
 
@@ -45,7 +48,7 @@ def create_transaction(
         buyer_id=current_user.id,
         book_id=transaction_data.book_id,
         total_price=transaction_data.total_price,
-        status="waiting" 
+        status=transactionModels.TransactionStatus.WAITING 
     )
     
     db.add(new_tx)

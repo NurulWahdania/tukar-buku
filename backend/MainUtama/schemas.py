@@ -239,7 +239,7 @@ class TransactionCreate(TransactionBase):
 
 class Transaction(TransactionBase):
     id: int
-    user_id: int
+    buyer_id: int
     status: TransactionStatus
     created_at: datetime
     book: Book
