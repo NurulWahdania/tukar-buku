@@ -190,10 +190,6 @@ from ..MainUtama import database, schemas, utils
 from ..Models import userModels, roleModels
 from .. import auth
 
-# =========================================================
-# 1. ROUTER AUTHENTICATION (PUBLIK - TANPA GEMBOK)
-# =========================================================
-# Router ini akan dipasang di main.py TANPA dependency keamanan
 router_auth = APIRouter(tags=["Authentication"])
 
 @router_auth.post("/register", response_model=schemas.User)

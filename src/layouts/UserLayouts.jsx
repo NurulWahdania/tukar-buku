@@ -6,7 +6,7 @@ import bg from '../assets/latar.png';
 import { getMe } from '../api/client'; 
 
 // Komponen Sidebar Dinamis untuk User
-function UserSidebar({ activeKey, setActiveKey }) {
+function UserSidebar({ activeKey, setActiveKey, mobileOpen, setMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
   const toTarget = (p) => p;
@@ -74,60 +74,84 @@ function UserSidebar({ activeKey, setActiveKey }) {
   };
 
   return (
-    <aside className="fixed left-8 top-28 w-60 h-[calc(100vh-220px)] flex flex-col gap-3 z-90 pointer-events-auto">
-      {menuItems.map(item => {
-        const isActive = activeKey === item.key;
-        return (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => {
-              setActiveKey(item.key);
-              navigate(toTarget(item.path));
-            }}
-            className={`w-full h-12 px-4 rounded-xl flex items-center gap-3 transition-colors relative z-90 pointer-events-auto ${isActive ? 'bg-white/5 backdrop-blur-[8px] border border-white/10' : 'hover:bg-white/10'}`}
-          >
-            <Icon name={item.label} />
-            <span className="text-[#FFE4C7] text-base">{item.label}</span>
-          </button>
-        );
-      })}
-
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); setInfoOpen(v => !v); setActiveKey('informasi'); }}
-        className={`w-full flex items-center justify-between h-12 px-4 rounded-xl transition-colors relative z-90 pointer-events-auto ${activeKey === 'informasi' ? 'bg-white/5 backdrop-blur-[8px] border border-white/10' : 'hover:bg-white/10'}`}
-      >
-        <div className="flex items-center gap-3">
-          <Icon name="Informasi" />
-          <span className="text-[#FFE4C7] text-base">Informasi</span>
-        </div>
-        <svg className={`w-4 h-4 transform transition-transform ${infoOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" stroke="#FFE4C7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 8l4 4 4-4" />
-        </svg>
-      </button>
-
-      {infoOpen && (
-        <div className="pl-6 flex flex-col gap-2 mt-1">
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setActiveKey('announcements'); navigate(toTarget('/announcements')); }}
-            className={`flex items-center gap-2 h-10 px-2 rounded relative z-90 pointer-events-auto ${activeKey === 'announcements' ? 'bg-white/5' : 'hover:bg-white/10'}`}
-          >
-            <Icon name="Pengumuman" />
-            <span className="text-[#FFE4C7] text-sm">Pengumuman</span>
-          </button>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setActiveKey('security-tips'); navigate(toTarget('/security-tips')); }}
-            className={`flex items-center gap-2 h-10 px-2 rounded relative z-90 pointer-events-auto ${activeKey === 'security-tips' ? 'bg-white/5' : 'hover:bg-white/10'}`}
-          >
-            <Icon name="Tips Keamanan" />
-            <span className="text-[#FFE4C7] text-sm">Tips Keamanan</span>
-          </button>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-[80] md:hidden backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
-    </aside>
+
+      <aside className={`
+        fixed top-0 bottom-0 md:top-28 md:bottom-auto md:h-[calc(100vh-220px)]
+        w-64 md:w-60 flex flex-col gap-3 z-[90] pointer-events-auto transition-transform duration-300 ease-in-out
+        ${mobileOpen ? 'translate-x-0 left-0 p-4 bg-[#1a1a1a] md:bg-transparent shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0 md:left-8'}
+      `}>
+        {/* Close button for mobile */}
+        <div className="md:hidden flex justify-end mb-4">
+           <button onClick={() => setMobileOpen(false)} className="text-[#FFE4C7]">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+             </svg>
+           </button>
+        </div>
+
+        {menuItems.map(item => {
+          const isActive = activeKey === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => {
+                setActiveKey(item.key);
+                navigate(toTarget(item.path));
+                if (setMobileOpen) setMobileOpen(false);
+              }}
+              className={`w-full h-12 px-4 rounded-xl flex items-center gap-3 transition-colors relative z-90 pointer-events-auto ${isActive ? 'bg-white/5 backdrop-blur-[8px] border border-white/10' : 'hover:bg-white/10'}`}
+            >
+              <Icon name={item.label} />
+              <span className="text-[#FFE4C7] text-base">{item.label}</span>
+            </button>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setInfoOpen(v => !v); setActiveKey('informasi'); }}
+          className={`w-full flex items-center justify-between h-12 px-4 rounded-xl transition-colors relative z-90 pointer-events-auto ${activeKey === 'informasi' ? 'bg-white/5 backdrop-blur-[8px] border border-white/10' : 'hover:bg-white/10'}`}
+        >
+          <div className="flex items-center gap-3">
+            <Icon name="Informasi" />
+            <span className="text-[#FFE4C7] text-base">Informasi</span>
+          </div>
+          <svg className={`w-4 h-4 transform transition-transform ${infoOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" stroke="#FFE4C7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 8l4 4 4-4" />
+          </svg>
+        </button>
+
+        {infoOpen && (
+          <div className="pl-6 flex flex-col gap-2 mt-1">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setActiveKey('announcements'); navigate(toTarget('/announcements')); if (setMobileOpen) setMobileOpen(false); }}
+              className={`flex items-center gap-2 h-10 px-2 rounded relative z-90 pointer-events-auto ${activeKey === 'announcements' ? 'bg-white/5' : 'hover:bg-white/10'}`}
+            >
+              <Icon name="Pengumuman" />
+              <span className="text-[#FFE4C7] text-sm">Pengumuman</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setActiveKey('security-tips'); navigate(toTarget('/security-tips')); if (setMobileOpen) setMobileOpen(false); }}
+              className={`flex items-center gap-2 h-10 px-2 rounded relative z-90 pointer-events-auto ${activeKey === 'security-tips' ? 'bg-white/5' : 'hover:bg-white/10'}`}
+            >
+              <Icon name="Tips Keamanan" />
+              <span className="text-[#FFE4C7] text-sm">Tips Keamanan</span>
+            </button>
+          </div>
+        )}
+      </aside>
+    </>
   );
 }
 
@@ -138,6 +162,7 @@ export default function UserLayouts() {
   
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || ""); // State pencarian
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State untuk menu mobile
 
   // Logika Pengambilan Data User (Self-Healing)
   useEffect(() => {
@@ -220,14 +245,25 @@ export default function UserLayouts() {
   };
 
   return (
-    <div className="min-h-screen min-w-full relative font-inter">
+    <div className="min-h-screen min-w-full relative font-inter overflow-x-hidden">
       <img src={bg} alt="background" className="fixed inset-0 w-full h-full object-cover z-0" />
 
-      <header className="fixed top-6 left-6 right-6 z-50 flex items-center">
-        <div className="text-[#FFE4C7] text-3xl font-bold font-['Inter']">TUKAR BUKU</div>
+      <header className="fixed top-0 left-0 right-0 md:top-6 md:left-6 md:right-6 z-50 flex items-center justify-between px-4 py-3 md:px-0 md:py-0 bg-black/20 md:bg-transparent backdrop-blur-md md:backdrop-blur-none transition-all">
+        <div className="flex items-center gap-3">
+            {/* Hamburger Menu for Mobile */}
+            <button 
+                className="md:hidden text-[#FFE4C7]"
+                onClick={() => setMobileMenuOpen(true)}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div className="text-[#FFE4C7] text-xl md:text-3xl font-bold font-['Inter'] whitespace-nowrap">TUKAR BUKU</div>
+        </div>
 
-        <div className="mx-auto">
-          <div className="w-[504px] h-10 relative">
+        <div className="hidden md:block mx-4 flex-1 max-w-[504px]">
+          <div className="w-full h-10 relative">
             <div className="absolute inset-0 bg-white/5 rounded-[20px] border border-white/10" />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FFE4C7]">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -239,7 +275,7 @@ export default function UserLayouts() {
               value={search}
               onChange={handleSearchChange}
               aria-label="Cari"
-              className="absolute left-[44px] top-1/2 -translate-y-1/2 w-[420px] bg-transparent outline-none text-[#FFE4C7] text-xs placeholder:text-[#CDBA9A] px-0"
+              className="absolute left-[44px] top-1/2 -translate-y-1/2 w-[calc(100%-50px)] bg-transparent outline-none text-[#FFE4C7] text-xs placeholder:text-[#CDBA9A] px-0"
               placeholder="Cari judul buku atau penulis..."
             />
           </div>
@@ -249,11 +285,11 @@ export default function UserLayouts() {
           <button
             type="button"
             onClick={() => setProfileOpen(v => !v)}
-            className="flex items-center gap-3 px-4 py-2 rounded-[28px] border border-white/20 bg-transparent hover:bg-white/5 outline outline-1 outline-offset-[-2px] outline-white/5"
+            className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-1 md:py-2 rounded-[28px] border border-white/20 bg-transparent hover:bg-white/5 outline outline-1 outline-offset-[-2px] outline-white/5"
             aria-expanded={profileOpen}
           >
-            <img src={avatarSrc} alt="avatar" className="w-9 h-9 rounded-full border-2 border-[#FFE4C7] object-cover" />
-            <span className="text-[#FFE4C7] font-medium">{displayName}</span>
+            <img src={avatarSrc} alt="avatar" className="w-8 h-8 md:w-9 md:h-9 rounded-full border-2 border-[#FFE4C7] object-cover" />
+            <span className="text-[#FFE4C7] font-medium hidden md:block">{displayName}</span>
             <svg className={`w-4 h-4 text-[#FFE4C7] transform ${profileOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="none" stroke="#FFE4C7" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 8l4 4 4-4" />
             </svg>
@@ -261,7 +297,7 @@ export default function UserLayouts() {
 
           {profileOpen && (
             <div className="absolute right-0 top-full mt-2 w-60 z-60 pointer-events-auto">
-              <div className="bg-white/5 rounded-2xl border border-white/10 p-3 space-y-3 mt-2">
+              <div className="bg-[#1a1a1a] md:bg-white/5 rounded-2xl border border-white/10 p-3 space-y-3 mt-2 shadow-xl">
                 <button
                   onClick={() => { setProfileOpen(false); navigate('/profile'); }}
                   className="w-full py-3 rounded-md text-[#FFE4C7] text-base font-medium hover:bg-white/10 text-left pl-3 flex items-center"
@@ -300,6 +336,25 @@ export default function UserLayouts() {
         </div>
       </header>
       
+      {/* Mobile Search Bar */}
+      <div className="md:hidden fixed top-[60px] left-4 right-4 z-40">
+          <div className="w-full h-10 relative">
+            <div className="absolute inset-0 bg-white/5 rounded-[20px] border border-white/10 backdrop-blur-sm" />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#FFE4C7]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="6" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
+            <input
+              value={search}
+              onChange={handleSearchChange}
+              className="absolute left-[44px] top-1/2 -translate-y-1/2 w-[calc(100%-50px)] bg-transparent outline-none text-[#FFE4C7] text-xs placeholder:text-[#CDBA9A] px-0"
+              placeholder="Cari judul buku atau penulis..."
+            />
+          </div>
+      </div>
+      
       {profileOpen && (
         <div
           className="fixed inset-0 bg-black/45 backdrop-blur-sm z-40"
@@ -308,18 +363,18 @@ export default function UserLayouts() {
         />
       )}
 
-      <UserSidebar activeKey={active} setActiveKey={setActive} />
+      <UserSidebar activeKey={active} setActiveKey={setActive} mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
 
-      <main className="absolute left-[300px] top-28 right-6 bottom-14 overflow-auto">
+      <main className="absolute left-0 md:left-[280px] lg:left-[300px] top-[110px] md:top-28 right-0 md:right-6 bottom-14 overflow-auto px-4 md:px-0 transition-all duration-300">
         <div className="max-w-[1020px] mx-auto py-4">
           <Outlet />
         </div>
       </main>
 
-      <footer className="fixed bottom-4 left-6 right-6 z-50">
+      <footer className="fixed bottom-0 md:bottom-4 left-0 md:left-6 right-0 md:right-6 z-50 bg-black/20 md:bg-transparent backdrop-blur-md md:backdrop-blur-none py-2 md:py-0">
         <div className="max-w-[1372px] mx-auto">
-          <div className="h-px w-full bg-white/10 mb-3" />
-          <div className="flex items-center justify-center gap-2 text-[#FFE4C7] text-sm">
+          <div className="h-px w-full bg-white/10 mb-3 hidden md:block" />
+          <div className="flex items-center justify-center gap-2 text-[#FFE4C7] text-xs md:text-sm">
             <div>Copyright ©</div>
             <div>Tukar Buku 2025</div>
           </div>
@@ -328,9 +383,9 @@ export default function UserLayouts() {
 
       {/* 🔑 MODAL KONFIRMASI LOGOUT */}
       {confirmLogoutOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setConfirmLogoutOpen(false)} />
-          <div className="relative z-[10001] w-96 p-6 bg-[#06070a] border border-white/10 rounded-xl shadow-2xl text-center">
+          <div className="relative z-[10001] w-full max-w-sm p-6 bg-[#06070a] border border-white/10 rounded-xl shadow-2xl text-center">
             <h3 className="text-[#FFE4C7] text-lg font-semibold mb-4">Konfirmasi Logout</h3>
             <p className="text-[#CDBA9A] mb-6">Apakah Anda yakin ingin keluar dari akun?</p>
             <div className="flex justify-center gap-4">

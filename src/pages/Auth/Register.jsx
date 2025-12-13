@@ -148,15 +148,27 @@ export default function Register() {
       <div className="fixed top-2 right-2 z-50 text-sm text-neutral-300 bg-black/50 px-3 py-1 rounded">
         Backend: {serverAvailable === null ? 'checking...' : serverAvailable ? <span className="text-emerald-400">reachable</span> : <span className="text-red-400">unreachable</span>}
       </div>
-      <img src={bg} alt="background" className="absolute inset-0 w-full h-full object-cover z-0" />
+      
+      {/* Background Image: Reverted to full cover */}
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <img 
+            src={bg} 
+            alt="background" 
+            className="w-full h-full object-cover opacity-80" 
+        />
+      </div>
 
-      <div className="w-full h-full relative z-10 flex items-start justify-start">
-        <div className="ml-36 mt-6 w-[500px] h-[780px] relative rounded-xl overflow-hidden">
-          <div className="absolute inset-0 rounded-xl bg-neutral-900/30 backdrop-blur-lg border border-white/5 p-8 flex flex-col">
-            <div className="text-[#FFE4C7] text-4xl font-semibold">Selamat Datang!</div>
-            <div className="mt-4 text-[#FFE4C7] text-2xl">Buat akun anda</div>
+      {/* Container: Center on mobile/tablet, Left on laptop/desktop */}
+      <div className="w-full h-full relative z-10 flex items-center justify-center lg:justify-start px-4 lg:px-0">
+        
+        {/* Card: Compact Responsive Dimensions */}
+        <div className="w-full max-w-[340px] lg:max-w-[360px] xl:max-w-[420px] h-auto mx-auto lg:mx-0 lg:ml-20 xl:ml-32 relative rounded-xl overflow-hidden shadow-2xl transition-all duration-300">
+          
+          <div className="w-full h-full rounded-xl bg-neutral-900/30 backdrop-blur-lg border border-white/5 p-6 lg:p-5 xl:p-8 flex flex-col">
+            <div className="text-[#FFE4C7] text-2xl lg:text-xl xl:text-3xl font-semibold">Selamat Datang!</div>
+            <div className="mt-2 lg:mt-2 xl:mt-4 text-[#FFE4C7] text-sm lg:text-xs xl:text-base opacity-90">Buat akun anda</div>
 
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+            <form onSubmit={handleSubmit} className="mt-6 lg:mt-4 xl:mt-6 flex flex-col gap-4 lg:gap-3 xl:gap-4">
               {/* Nama lengkap */}
               <div className="relative">
                 <input
@@ -166,12 +178,12 @@ export default function Register() {
                   onFocus={() => setNameFocused(true)}
                   onBlur={() => setNameFocused(false)}
                   placeholder=" "
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!name && !nameFocused && (
-                  <label className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">Nama lengkap</label>
+                  <label className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">Nama lengkap</label>
                 )}
-                {errors.name && <div className="mt-2 text-red-400 text-sm">{errors.name}</div>}
+                {errors.name && <div className="mt-1 text-red-400 text-[10px] lg:text-[9px] xl:text-xs">{errors.name}</div>}
               </div>
 
               {/* Email */}
@@ -183,12 +195,12 @@ export default function Register() {
                   onFocus={() => setEmailFocused(true)}
                   onBlur={() => setEmailFocused(false)}
                   placeholder=" "
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!email && !emailFocused && (
-                  <label className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">Email</label>
+                  <label className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">Email</label>
                 )}
-                {errors.email && <div className="mt-2 text-red-400 text-sm">{errors.email}</div>}
+                {errors.email && <div className="mt-1 text-red-400 text-[10px] lg:text-[9px] xl:text-xs">{errors.email}</div>}
               </div>
 
               {/* Username */}
@@ -200,12 +212,12 @@ export default function Register() {
                   onFocus={() => setUsernameFocused(true)}
                   onBlur={() => setUsernameFocused(false)}
                   placeholder=" "
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!username && !usernameFocused && (
-                  <label className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">Username</label>
+                  <label className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">Username</label>
                 )}
-                {errors.username && <div className="mt-2 text-red-400 text-sm">{errors.username}</div>}
+                {errors.username && <div className="mt-1 text-red-400 text-[10px] lg:text-[9px] xl:text-xs">{errors.username}</div>}
               </div>
 
               {/* Password */}
@@ -218,41 +230,36 @@ export default function Register() {
                   onBlur={() => setPasswordFocused(false)}
                   placeholder=" "
                   minLength={8}
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!password && !passwordFocused && (
-                  <label className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">Password</label>
+                  <label className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">Password</label>
                 )}
-                {errors.password && <div className="mt-2 text-red-400 text-sm">{errors.password}</div>}
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div />
+                {errors.password && <div className="mt-1 text-red-400 text-[10px] lg:text-[9px] xl:text-xs">{errors.password}</div>}
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full h-16 rounded-[20px] text-black text-xl font-medium shadow-[0_4px_4px_rgba(0,0,0,0.15)] ${isSubmitting ? 'bg-white/30 cursor-not-allowed' : 'bg-[#FFE4C7]'}`}
+                className={`w-full h-10 lg:h-9 xl:h-12 rounded-[12px] text-black text-sm lg:text-xs xl:text-base font-medium shadow-[0_4px_4px_rgba(0,0,0,0.15)] transition-all ${isSubmitting ? 'bg-white/30 cursor-not-allowed' : 'bg-[#FFE4C7] hover:bg-[#ffdec0] active:scale-[0.98]'}`}
               >
                 {isSubmitting ? 'Memproses...' : 'Daftar'}
               </button>
-              {serverError && <div className="mt-2 text-red-400 text-sm break-words">{serverError}</div>}
+              {serverError && <div className="mt-1 text-red-400 text-[10px] lg:text-[9px] xl:text-xs break-words text-center">{serverError}</div>}
             </form>
 
-            <div className="mt-6 flex items-center justify-center gap-6">
-              <div className="w-44 h-px bg-neutral-400" />
-              <div className="text-neutral-400">Atau</div>
-              <div className="w-44 h-px bg-neutral-400" />
+            <div className="mt-5 lg:mt-3 xl:mt-6 flex items-center justify-center gap-3">
+              <div className="w-full h-px bg-neutral-400/50" />
+              <div className="text-neutral-400 text-[10px] lg:text-[9px] xl:text-xs whitespace-nowrap">Atau</div>
+              <div className="w-full h-px bg-neutral-400/50" />
             </div>
 
-            <div className="mt-auto text-center">
-              <span className="text-neutral-400">Sudah punya akun? </span>
-              <Link to="/login" className="text-[#FFE4C7] font-semibold hover:underline">Masuk</Link>
+            <div className="mt-4 lg:mt-2 xl:mt-5 text-center">
+              <span className="text-neutral-400 text-[10px] lg:text-[9px] xl:text-xs">Sudah punya akun? </span>
+              <Link to="/login" className="text-[#FFE4C7] font-semibold hover:underline text-[10px] lg:text-[9px] xl:text-xs">Masuk</Link>
             </div>
           </div>
         </div>
-        <div className="flex-1" />
       </div>
 
       {/* Success modal */}

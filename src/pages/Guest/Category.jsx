@@ -10,10 +10,10 @@ function BookCard({ title, author, price, condition, imageUrl, isSold, isBarter,
     : (typeof price === 'number' ? `Rp ${price.toLocaleString()}` : price);
 
   return (
-    <div className="w-60 rounded-xl outline outline-1 outline-white bg-white/5 backdrop-blur-[10px] overflow-hidden flex flex-col group relative cursor-pointer hover:bg-white/10 transition-all">
+    <div className="w-full rounded-xl outline outline-1 outline-white bg-white/5 backdrop-blur-[10px] overflow-hidden flex flex-col group relative cursor-pointer hover:bg-white/10 transition-all">
       
       {/* Gambar Buku */}
-      <div className="w-full h-60 relative overflow-hidden bg-zinc-800">
+      <div className="w-full aspect-square relative overflow-hidden bg-zinc-800">
         <img 
             className="w-full h-full object-cover transition-transform group-hover:scale-105" 
             src={imageUrl || "https://placehold.co/240x240?text=No+Image"} 
@@ -96,82 +96,84 @@ function BookDetailModal({ book, onClose }) {
   const displayPrice = book.is_barter ? "Barter" : (typeof book.price === 'number' ? `Rp ${book.price.toLocaleString()}` : book.price);
 
   const redirectToLogin = () => {
-      onClose(); // Tutup modal
-      navigate('/login'); // Arahkan ke login
+      onClose();
+      navigate('/login');
   };
 
   return typeof document !== 'undefined' ? createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative w-[1000px] max-w-full h-[650px] bg-[#18181b] border border-white/10 rounded-2xl flex overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+      <div className="relative w-full max-w-[1000px] max-h-[95vh] sm:max-h-[90vh] md:h-[650px] bg-[#18181b] border border-white/10 rounded-xl sm:rounded-2xl flex flex-col md:flex-row overflow-hidden shadow-2xl animate-in zoom-in duration-200">
         
         {/* Kiri: Gambar Besar */}
-        <div className="w-[45%] h-full bg-black flex items-center justify-center p-6 relative">
+        <div className="w-full md:w-[45%] h-[35%] sm:h-[40%] md:h-full bg-black flex items-center justify-center p-4 sm:p-6 relative">
              <img className="w-full h-full object-contain rounded-lg" src={book.image_url || "https://placehold.co/500x700"} alt={book.title} />
         </div>
 
         {/* Kanan: Detail Info */}
-        <div className="w-[55%] h-full p-8 flex flex-col overflow-y-auto">
+        <div className="w-full md:w-[55%] h-[65%] sm:h-[60%] md:h-full p-4 sm:p-6 md:p-8 flex flex-col overflow-y-auto">
           
           {/* Header Toko (Guest -> Login jika diklik) */}
           <div 
              onClick={redirectToLogin}
-             className="flex items-center gap-4 cursor-pointer group mb-6 p-2 -ml-2 rounded-xl hover:bg-white/5 transition-colors border border-white/5 hover:border-white/20"
+             className="flex items-center gap-3 sm:gap-4 cursor-pointer group mb-4 sm:mb-6 p-2 -ml-2 rounded-xl hover:bg-white/5 transition-colors border border-white/5 hover:border-white/20"
              title="Login untuk lihat profil toko"
           >
-            <img className="w-12 h-12 rounded-full border border-white/10 object-cover" src={book.store?.store_photo_url || "https://placehold.co/60"} alt="store" />
+            <img className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/10 object-cover" src={book.store?.store_photo_url || "https://placehold.co/60"} alt="store" />
             <div>
-                <div className="text-[#FFE4C7] text-lg font-bold group-hover:underline decoration-[#FFE4C7]">{book.store?.nama_toko || "Nama Toko"}</div>
+                <div className="text-[#FFE4C7] text-base sm:text-lg font-bold group-hover:underline decoration-[#FFE4C7]">{book.store?.nama_toko || "Nama Toko"}</div>
                 <div className="text-zinc-400 text-xs group-hover:text-white transition-colors">Penjual Terpercaya</div>
             </div>
           </div>
 
-          <div className="mb-6">
-            <h1 className="text-[#FFE4C7] text-4xl font-bold leading-tight mb-2">{book.title}</h1>
-            <p className="text-zinc-400 text-lg font-medium">{book.author}</p>
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-[#FFE4C7] text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-2">{book.title}</h1>
+            <p className="text-zinc-400 text-base sm:text-lg font-medium">{book.author}</p>
           </div>
 
-          <div className="flex-1 mb-6 pr-2 overflow-y-auto text-zinc-300 text-sm leading-relaxed whitespace-pre-line border-l-2 border-white/10 pl-4">
+          <div className="flex-1 mb-4 sm:mb-6 pr-2 overflow-y-auto text-zinc-300 text-xs sm:text-sm leading-relaxed whitespace-pre-line border-l-2 border-white/10 pl-3 sm:pl-4">
             {book.description || "Tidak ada deskripsi."}
           </div>
 
-          <div className="mt-auto pt-6 border-t border-white/10">
-            <div className="flex justify-between items-end mb-6">
+          <div className="mt-auto pt-4 sm:pt-6 border-t border-white/10">
+            <div className="flex justify-between items-end mb-4 sm:mb-6">
                <div>
-                  <p className="text-zinc-500 text-xs uppercase tracking-wider font-bold mb-1">{book.is_barter ? 'Tipe Transaksi' : 'Harga Buku'}</p>
-                  <p className="text-[#FFE4C7] text-3xl font-bold">{displayPrice}</p>
+                  <p className="text-zinc-500 text-[10px] sm:text-xs uppercase tracking-wider font-bold mb-1">{book.is_barter ? 'Tipe Transaksi' : 'Harga Buku'}</p>
+                  <p className="text-[#FFE4C7] text-xl sm:text-2xl md:text-3xl font-bold">{displayPrice}</p>
                </div>
                <div className="text-right">
-                  <p className="text-zinc-500 text-xs uppercase tracking-wider font-bold mb-1">Kondisi</p>
-                  <span className="px-3 py-1 bg-white/10 rounded text-[#FFE4C7] text-sm font-medium border border-white/10">{book.condition}</span>
+                  <p className="text-zinc-500 text-[10px] sm:text-xs uppercase tracking-wider font-bold mb-1">Kondisi</p>
+                  <span className="px-2 sm:px-3 py-1 bg-white/10 rounded text-[#FFE4C7] text-xs sm:text-sm font-medium border border-white/10">{book.condition}</span>
                </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                {/* Tombol Lapor (Guest -> Login) */}
-               <button onClick={redirectToLogin} className="w-12 h-12 flex items-center justify-center rounded-xl border border-zinc-600 text-zinc-400 hover:border-red-500 hover:text-red-500 transition-colors" title="Login untuk melapor">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+               <button onClick={redirectToLogin} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-zinc-600 text-zinc-400 hover:border-red-500 hover:text-red-500 transition-colors" title="Login untuk melapor">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                </button>
 
                {!book.is_sold ? (
                  <>
                    {/* Wishlist (Guest -> Login) */}
-                   <button onClick={redirectToLogin} className="w-12 h-12 flex items-center justify-center rounded-xl border border-zinc-600 text-zinc-400 hover:border-[#FFE4C7] hover:text-[#FFE4C7] transition-all">
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                   <button onClick={redirectToLogin} className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-zinc-600 text-zinc-400 hover:border-[#FFE4C7] hover:text-[#FFE4C7] transition-all">
+                      <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                    </button>
                    {/* Hubungi (Guest -> Login) */}
-                   <button onClick={redirectToLogin} className="flex-1 h-12 bg-[#FFE4C7] hover:bg-[#ffdec0] text-black text-lg font-bold rounded-xl shadow-lg shadow-[#FFE4C7]/20 transition-all flex items-center justify-center gap-2">
-                      <span>Login untuk Membeli</span>
+                   <button onClick={redirectToLogin} className="flex-1 h-10 sm:h-12 bg-[#FFE4C7] hover:bg-[#ffdec0] text-black text-sm sm:text-base md:text-lg font-bold rounded-xl shadow-lg shadow-[#FFE4C7]/20 transition-all flex items-center justify-center gap-2">
+                      <span className="hidden sm:inline">Login untuk Membeli</span>
+                      <span className="sm:hidden">Login</span>
                    </button>
                  </>
                ) : (
                  <>
                    {/* Lihat Ulasan (Guest -> Login) */}
-                   <button onClick={redirectToLogin} className="flex-1 h-12 border border-[#FFE4C7] text-[#FFE4C7] hover:bg-[#FFE4C7]/10 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                      Login untuk Lihat Ulasan
+                   <button onClick={redirectToLogin} className="flex-1 h-10 sm:h-12 border border-[#FFE4C7] text-[#FFE4C7] hover:bg-[#FFE4C7]/10 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                      <span className="hidden sm:inline">Login untuk Lihat Ulasan</span>
+                      <span className="sm:hidden">Ulasan</span>
                    </button>
-                   <div className="px-6 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-zinc-500 font-bold cursor-not-allowed">
+                   <div className="px-3 sm:px-6 h-10 sm:h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-zinc-500 text-xs sm:text-sm font-bold cursor-not-allowed">
                       TERJUAL
                    </div>
                  </>
@@ -180,8 +182,8 @@ function BookDetailModal({ book, onClose }) {
           </div>
         </div>
 
-        <button className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-white/20 text-white transition-colors" onClick={onClose}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        <button className="absolute top-2 right-2 sm:top-4 sm:right-4 p-1.5 sm:p-2 rounded-full bg-black/50 hover:bg-white/20 text-white transition-colors" onClick={onClose}>
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
     </div>, document.body
@@ -242,35 +244,37 @@ export default function Category() {
   };
 
   return (
-    <div className="w-[1020px] min-h-[828px] relative">
+    <div className="w-full max-w-[1020px] min-h-[828px] relative mx-auto px-0 sm:px-4 lg:px-0">
       {/* Filter Kategori */}
-      <div className="absolute left-0 top-0 z-10">
-        <div className="w-[608px] h-8 flex items-center gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={`h-8 px-3 rounded-xl inline-flex items-center justify-center transition-all ${
-                selectedCategory === cat 
-                  ? 'bg-[#FFE4C7] text-black font-medium' 
-                  : 'bg-white/5 text-[#FFE4C7] outline outline-1 outline-offset-[-1px] outline-white backdrop-blur-[10px] hover:bg-white/10'
-              }`}
-            >
-              <div className="text-sm font-['Inter']">{cat}</div>
-            </button>
-          ))}
+      <div className="relative top-0 z-10 w-full mb-3 sm:mb-0 sm:absolute">
+        <div className="w-full overflow-x-auto scrollbar-hide pb-2 sm:pb-0">
+          <div className="min-w-max h-8 flex items-center gap-2 sm:gap-3 px-4 sm:px-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`h-8 px-3 rounded-xl inline-flex items-center justify-center transition-all whitespace-nowrap ${
+                  selectedCategory === cat 
+                    ? 'bg-[#FFE4C7] text-black font-medium' 
+                    : 'bg-white/5 text-[#FFE4C7] outline outline-1 outline-offset-[-1px] outline-white backdrop-blur-[10px] hover:bg-white/10'
+                }`}
+              >
+                <div className="text-xs sm:text-sm font-['Inter']">{cat}</div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Container Buku */}
-      <div className="absolute left-0 top-[48px] w-full min-h-[780px] rounded-[20px] outline outline-1 outline-white overflow-hidden">
+      <div className="relative sm:absolute left-0 top-[52px] sm:top-[48px] w-full min-h-[calc(100vh-200px)] sm:min-h-[780px] rounded-[20px] outline outline-1 outline-white overflow-hidden">
         <div className="w-full h-full bg-white/5 border border-white backdrop-blur-[10px] absolute inset-0 pointer-events-none" />
-        <div className="absolute left-[20px] top-[16px] text-[#FFE4C7] text-xl font-semibold font-['Inter'] z-10">
+        <div className="absolute left-4 sm:left-[20px] top-3 sm:top-[16px] text-[#FFE4C7] text-lg sm:text-xl font-semibold font-['Inter'] z-10">
           {selectedCategory}
         </div>
 
-        <div className="pt-[56px] px-5 pb-5 relative z-10">
+        <div className="pt-12 sm:pt-[56px] px-3 sm:px-5 pb-5 relative z-10">
           {loading ? (
             <div className="flex items-center justify-center h-60 text-[#FFE4C7]">Memuat buku...</div>
           ) : filteredBooks.length === 0 ? (
@@ -278,7 +282,7 @@ export default function Category() {
               Tidak ada buku di kategori ini.
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-x-5 gap-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-x-5 sm:gap-y-6">
               {filteredBooks.map((book) => (
                 <div key={book.id} onClick={() => setSelectedBook(book)}>
                   <BookCard 
@@ -289,7 +293,7 @@ export default function Category() {
                     imageUrl={book.image_url}
                     isBarter={book.is_barter}
                     isSold={book.is_sold}
-                    onAction={handleAuthRedirect} // Semua aksi -> Login
+                    onAction={handleAuthRedirect}
                   />
                 </div>
               ))}

@@ -103,15 +103,36 @@ export default function Login() {
 
   return (
     <div className="w-screen h-screen relative bg-black overflow-hidden font-inter">
-      <img src={bg} alt="background" className="absolute inset-0 w-full h-full object-cover z-0" />
+      {/* Background Image: Reverted to full cover */}
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <img 
+            src={bg} 
+            alt="background" 
+            className="w-full h-full object-cover opacity-80" 
+        />
+      </div>
 
-      <div className="w-full h-full relative z-10 flex items-center justify-start">
-        <div className="ml-36 mt-5 w-[464px] h-[689px] relative rounded-xl overflow-hidden">
-          <div className="absolute inset-0 rounded-xl bg-neutral-900/30 backdrop-blur-[6px] border border-white/10 p-8 flex flex-col">
-            <div className="text-[#FFE4C7] text-4xl font-semibold leading-tight">Selamat datang<br/>kembali!</div>
-            <div className="mt-6 text-[#FFE4C7] text-2xl">Masuk ke akun anda</div>
+      {/* Container: Center on mobile/tablet, Left on laptop/desktop */}
+      <div className="w-full h-full relative z-10 flex items-center justify-center lg:justify-start px-4 lg:px-0">
+        
+        {/* Card: Extra Compact for Laptop + Scale Down */}
+        <div className="w-full max-w-[320px] lg:max-w-[340px] xl:max-w-[380px] h-auto mx-auto lg:mx-0 lg:ml-20 xl:ml-32 relative rounded-xl overflow-hidden shadow-2xl transition-all duration-300">
+          
+          {/* Inner Card */}
+          <div className="w-full h-full rounded-xl bg-neutral-900/30 backdrop-blur-[6px] border border-white/10 p-6 lg:p-5 xl:p-8 flex flex-col">
+            
+            {/* Title */}
+            <div className="text-[#FFE4C7] text-2xl lg:text-xl xl:text-3xl font-semibold leading-tight">
+              Selamat datang<br/>kembali!
+            </div>
+            
+            {/* Subtitle */}
+            <div className="mt-2 lg:mt-2 xl:mt-3 text-[#FFE4C7] text-sm lg:text-xs xl:text-base opacity-90">
+              Masuk ke akun anda
+            </div>
 
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+            <form onSubmit={handleSubmit} className="mt-6 lg:mt-4 xl:mt-6 flex flex-col gap-4 lg:gap-3 xl:gap-4">
+              {/* Username Input */}
               <div className="relative">
                 <input
                   id="login-username"
@@ -121,15 +142,16 @@ export default function Login() {
                   onFocus={() => setUsernameFocused(true)}
                   onBlur={() => setUsernameFocused(false)}
                   placeholder=" "
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] lg:rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!username && (
-                  <label htmlFor="login-username" className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">
+                  <label htmlFor="login-username" className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">
                     Username
                   </label>
                 )}
               </div>
 
+              {/* Password Input */}
               <div className="relative">
                 <input
                   id="login-password"
@@ -139,39 +161,44 @@ export default function Login() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   placeholder=" "
-                  className="w-full h-16 px-6 rounded-[20px] bg-white/5 border border-zinc-400 text-[#FFE4C7] outline-none focus:border-[#FFE4C7] transition-colors"
+                  className="w-full h-10 lg:h-9 xl:h-12 px-4 rounded-[12px] lg:rounded-[12px] bg-white/5 border border-zinc-400 text-[#FFE4C7] text-xs lg:text-[10px] xl:text-sm outline-none focus:border-[#FFE4C7] transition-colors"
                 />
                 {!password && (
-                  <label htmlFor="login-password" className="absolute left-6 top-5 pointer-events-none text-zinc-400 text-base">
+                  <label htmlFor="login-password" className="absolute left-4 top-2.5 lg:top-2.5 xl:top-3.5 pointer-events-none text-zinc-400 text-xs lg:text-[10px] xl:text-sm">
                     Password
                   </label>
                 )}
               </div>
 
+              {/* Forgot Password */}
               <div className="flex items-center justify-between">
-                <button type="button" className="text-neutral-400 hover:text-[#FFE4C7] text-sm">Lupa password?</button>
+                <button type="button" className="text-neutral-400 hover:text-[#FFE4C7] text-[10px] lg:text-[9px] xl:text-xs">Lupa password?</button>
               </div>
 
-              {serverError && <div className="p-3 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-sm text-center">{serverError}</div>}
+              {/* Error Message */}
+              {serverError && <div className="p-2 bg-red-500/20 border border-red-500/50 rounded text-red-200 text-[10px] lg:text-[9px] xl:text-xs text-center">{serverError}</div>}
               
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full h-16 rounded-[20px] text-black text-xl font-medium shadow-[0_4px_4px_rgba(0,0,0,0.15)] transition-all ${isSubmitting ? 'bg-white/30 cursor-not-allowed' : 'bg-[#FFE4C7] hover:bg-[#ffdec0] active:scale-[0.98]'}`}
+                className={`w-full h-10 lg:h-9 xl:h-12 rounded-[12px] lg:rounded-[12px] text-black text-sm lg:text-xs xl:text-base font-medium shadow-[0_4px_4px_rgba(0,0,0,0.15)] transition-all ${isSubmitting ? 'bg-white/30 cursor-not-allowed' : 'bg-[#FFE4C7] hover:bg-[#ffdec0] active:scale-[0.98]'}`}
               >
                 {isSubmitting ? 'Memproses...' : 'Masuk'}
               </button>
             </form>
 
-            <div className="mt-8 flex items-center justify-center gap-6">
-              <div className="w-44 h-px bg-neutral-400" />
-              <div className="text-neutral-400">Atau</div>
-              <div className="w-44 h-px bg-neutral-400" />
+            {/* Divider */}
+            <div className="mt-5 lg:mt-3 xl:mt-6 flex items-center justify-center gap-3">
+              <div className="w-full h-px bg-neutral-400/50" />
+              <div className="text-neutral-400 text-[10px] lg:text-[9px] xl:text-xs whitespace-nowrap">Atau</div>
+              <div className="w-full h-px bg-neutral-400/50" />
             </div>
 
-            <div className="mt-auto text-center">
-              <span className="text-neutral-400">Belum punya akun? </span>
-              <Link to="/register" className="text-[#FFE4C7] font-semibold hover:underline">Daftar Sekarang</Link>
+            {/* Register Link */}
+            <div className="mt-4 lg:mt-2 xl:mt-5 text-center">
+              <span className="text-neutral-400 text-[10px] lg:text-[9px] xl:text-xs">Belum punya akun? </span>
+              <Link to="/register" className="text-[#FFE4C7] font-semibold hover:underline text-[10px] lg:text-[9px] xl:text-xs">Daftar Sekarang</Link>
             </div>
           </div>
         </div>
